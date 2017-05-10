@@ -1,2 +1,4 @@
 # nlpdata
-Utilities for reading at working with various datasets for NLP.
+Utilities for reading and working with various datasets for NLP.
+
+Documentation coming soon.
