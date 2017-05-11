@@ -20,7 +20,7 @@ class Wiki1kFileSystemService(
   val location: Path
 ) extends Wiki1kService[Try] {
 
-  override val monad: Monad[Try] = implicitly[Monad[Try]]
+  override protected val monad: Monad[Try] = implicitly[Monad[Try]]
 
   import com.softwaremill.macmemo.memoize
   import com.softwaremill.macmemo.MemoCacheBuilder

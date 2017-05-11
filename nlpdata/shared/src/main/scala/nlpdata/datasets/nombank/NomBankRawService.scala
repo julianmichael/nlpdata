@@ -10,7 +10,7 @@ import nlpdata.datasets.ptb._
 class NomBankRawService[M[_]](
   val nombank: collection.Map[PTBSentencePath, List[NomBankEntry]],
   ptbService: PTBService[M])(
-  implicit override val monad: Monad[M]
+  implicit override protected val monad: Monad[M]
 ) extends NomBankService[M] {
 
   override def getPredArgStructures(

@@ -11,7 +11,7 @@ import scala.util.Try
 import java.nio.file.{Paths, Path, Files}
 
 class PropBankFileSystemService(location: Path) extends PropBankService[Try] {
-  implicit override val monad: Monad[Try] = implicitly[Monad[Try]]
+  implicit override protected val monad: Monad[Try] = implicitly[Monad[Try]]
 
   private[this] val propBankAnnotationPath = location.resolve("data")
 

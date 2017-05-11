@@ -17,7 +17,7 @@ class QASRLFileSystemService(
   ptbService: PTBService[Try]
 ) extends QASRLService[Try] {
 
-  implicit override val monad: Monad[Try] = implicitly[Monad[Try]]
+  implicit override protected val monad: Monad[Try] = implicitly[Monad[Try]]
 
   private[this] val qasrlAnnotationPath = location.resolve("propbank-qasrl.txt")
   private[this] val qasrlPathsPath = location.resolve("qasrl-paths.txt")

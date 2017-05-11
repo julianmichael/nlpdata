@@ -4,7 +4,7 @@ import cats.Monad
 import cats.syntax.all._
 
 trait QASRLService[M[_]] {
-  implicit def monad: Monad[M]
+  implicit protected def monad: Monad[M]
 
   // TODO define general service API
 }

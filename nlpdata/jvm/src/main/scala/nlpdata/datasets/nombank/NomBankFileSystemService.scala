@@ -16,7 +16,7 @@ class NomBankFileSystemService(
   ptbService: PTBService[Try]
 ) extends NomBankService[Try] {
 
-  implicit override val monad: Monad[Try] = implicitly[Monad[Try]]
+  implicit override protected val monad: Monad[Try] = implicitly[Monad[Try]]
 
   private[this] val nomBankAnnotationPath = location.resolve("nombank.1.0")
 

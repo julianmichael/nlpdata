@@ -4,7 +4,7 @@ import cats.Monad
 import cats.syntax.all._
 
 trait Wiki1kService[M[_]] {
-  implicit def monad: Monad[M]
+  implicit protected def monad: Monad[M]
 
   def getFile(path: Wiki1kPath): M[Wiki1kFile]
 

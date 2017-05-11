@@ -11,7 +11,7 @@ import scala.language.implicitConversions
 import java.nio.file.{Paths, Path, Files}
 
 class PTBFileSystemService(location: Path) extends PTBService[Try] {
-  implicit val monad: Monad[Try] = implicitly[Monad[Try]]
+  implicit override protected val monad: Monad[Try] = implicitly[Monad[Try]]
   private[this] val wsjAnnotationPath = location.resolve(Paths.get("COMBINED/WSJ"))
 
   import com.softwaremill.macmemo.memoize

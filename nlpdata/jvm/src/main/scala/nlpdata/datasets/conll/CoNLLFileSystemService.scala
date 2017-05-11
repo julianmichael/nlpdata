@@ -10,7 +10,7 @@ import scala.util.{Try, Success, Failure}
 import java.nio.file.{Paths, Path, Files}
 
 class CoNLLFileSystemService(location: Path) extends CoNLLService[Try] {
-  override implicit val monad: Monad[Try] = implicitly[Monad[Try]]
+  override implicit protected val monad: Monad[Try] = implicitly[Monad[Try]]
 
   import com.softwaremill.macmemo.memoize
   import com.softwaremill.macmemo.MemoCacheBuilder

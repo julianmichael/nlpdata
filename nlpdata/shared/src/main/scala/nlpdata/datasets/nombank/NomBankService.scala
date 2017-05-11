@@ -7,7 +7,7 @@ import nlpdata.datasets.ptb._
 import nlpdata.structure._
 
 trait NomBankService[M[_]] {
-  implicit def monad: Monad[M]
+  implicit protected def monad: Monad[M]
 
   def getPredArgStructures(
     path: PTBSentencePath
