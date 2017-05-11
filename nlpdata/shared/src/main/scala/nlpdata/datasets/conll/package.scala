@@ -5,7 +5,7 @@ import nlpdata.structure._
 
 import scala.util.Try
 
-package object conll extends PackagePlatformExtensions {
+package object conll {
 
   implicit class CoNLLText(val tr: Text.type) extends AnyVal {
     def render(sentence: CoNLLSentence) = {

@@ -2,7 +2,7 @@ package nlpdata.datasets
 
 import nlpdata.util._
 
-package object wiki1k extends PackagePlatformExtensions {
+package object wiki1k {
   val wiki1kDomains = List("wikipedia", "wikinews")
 
   case class Wiki1kPath(domain: String, suffix: String) {

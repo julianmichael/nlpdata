@@ -5,7 +5,7 @@ import nlpdata.util._
 
 import scala.util.Try
 
-package object ptb extends PackagePlatformExtensions {
+package object ptb {
   implicit class PTBText(val tr: Text.type) extends AnyVal {
     def getTokens(sentence: PTBSentence): Vector[String] = {
       sentence.words.filter(_.pos != "-NONE-").map(_.token)

@@ -3,7 +3,7 @@ package nlpdata.datasets
 import scala.util.Try
 import nlpdata.structure._
 
-package object propbank extends PackagePlatformExtensions {
+package object propbank {
 
   implicit class PropBankText(val tr: nlpdata.util.Text.type) extends AnyVal {
     def render(sentence: PropBankSentence): String = {

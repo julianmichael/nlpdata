@@ -4,7 +4,7 @@ import nlpdata.structure._
 import nlpdata.datasets.ptb._
 import nlpdata.util._
 
-package object nombank extends PackagePlatformExtensions {
+package object nombank {
 
   case class SpanIndicator(
     leftIndex: Int,
