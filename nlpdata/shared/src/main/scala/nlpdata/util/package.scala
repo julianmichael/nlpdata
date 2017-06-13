@@ -39,6 +39,7 @@ package object util extends PackagePlatformExtensions {
     protected[util] sealed trait LowerCaseStringOps {
       def lowerCase(s: String): LowerCaseString
       def +(s1: LowerCaseString, s2: LowerCaseString): LowerCaseString
+      def contains(s1: LowerCaseString, s2: LowerCaseString): Boolean
     }
     protected[util] val LowerCaseStringOpsImpl: LowerCaseStringOps
     implicit def lowerCaseStringToString(lcs: LowerCaseString): String
@@ -52,6 +53,7 @@ package object util extends PackagePlatformExtensions {
     protected[util] override object LowerCaseStringOpsImpl extends LowerCaseStringOps {
       override def lowerCase(s: String): LowerCaseString = s.toLowerCase
       override def +(s1: LowerCaseString, s2: LowerCaseString) = s1 + s2
+      override def contains(s1: LowerCaseString, s2: LowerCaseString) = s1 contains s2
     }
     override implicit def lowerCaseStringToString(lcs: LowerCaseString): String =
       lcs
@@ -63,6 +65,7 @@ package object util extends PackagePlatformExtensions {
   import LowerCaseStrings.LowerCaseString
   protected class LowerCaseStringWrapper(val lcs: LowerCaseString) extends AnyVal {
     def +(other: LowerCaseString): LowerCaseString = LowerCaseStrings.LowerCaseStringOpsImpl.+(lcs, other)
+    def contains(other: LowerCaseString): Boolean = LowerCaseStrings.LowerCaseStringOpsImpl.contains(lcs, other)
   }
   protected class StringToLowerCaseWrapper(val s: String) extends AnyVal {
     def lowerCase = LowerCaseStrings.LowerCaseStringOpsImpl.lowerCase(s)
