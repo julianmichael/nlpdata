@@ -26,7 +26,7 @@ package object util extends PackagePlatformExtensions {
    * Wield it with pride.
    * NOTE: there are projects to help you do refinement typing...but they seem a bit heavier weight for client code...idk
    * Anyway, don't try to read the code just below. The point is that you can write:
-   * import mts.util.LowerCaseStrings._
+   * import nlpdata.util.LowerCaseStrings._
    * and then you get the _.lowerCase method on strings, which yields a LowerCaseString,
    * as well as an implicit conversion from LowerCaseString back to String.
    * In addition, certain uses of existing methods on String will preserve LowerCaseString (as of now, just +);

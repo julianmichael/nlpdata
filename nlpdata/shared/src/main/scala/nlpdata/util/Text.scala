@@ -54,7 +54,6 @@ object Text {
     * (Bear in mind you need to normalize PTB tokens yourself inside the renderWord parameter.)
     * Allows you to specify how to render spaces and words so you can use this to create interactive DOM elements in JS.
     * And it's M O N A D I C C
-    * TODO change to foldable LOL
     */
   def renderM[Word, F[_]: Foldable, M[_] : Monad, Result : Monoid](
     words: F[Word],
@@ -101,13 +100,13 @@ object Text {
     }.map(_._1)
   }
 
-  def render[Word, M](
-    words: Seq[Word],
+  def render[Word, F[_]: Foldable, M](
+    words: F[Word],
     getToken: Word => String,
     spaceFromNextWord: Word => M,
     renderWord: Word => M)(
     implicit M: Monoid[M]): M = {
-    renderM[Word, List, Id, M](words.toList, getToken, spaceFromNextWord, renderWord)
+    renderM[Word, List, Id, M](words, getToken, spaceFromNextWord, renderWord)
   }
 
   /** Convenience method for rendering a sequence of PTB tokens directly to a string. */
