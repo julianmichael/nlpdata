@@ -106,12 +106,12 @@ object Text {
     spaceFromNextWord: Word => M,
     renderWord: Word => M)(
     implicit M: Monoid[M]): M = {
-    renderM[Word, List, Id, M](words, getToken, spaceFromNextWord, renderWord)
+    renderM[Word, F, Id, M](words, getToken, spaceFromNextWord, renderWord)
   }
 
   /** Convenience method for rendering a sequence of PTB tokens directly to a string. */
   def render(words: Seq[String]): String =
-    render[String, String](words, identity, _ => " ", normalizeToken)
+    render[String, List, String](words.toList, identity, _ => " ", normalizeToken)
 
   def renderSpan(reference: Seq[String], span: Set[Int]) =
     render(reference.zipWithIndex.filter(p => span.contains(p._2)).map(_._1))
