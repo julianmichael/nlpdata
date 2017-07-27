@@ -53,7 +53,7 @@ object Text {
     * Returns a best-effort properly spaced representation of a sequence of tokens.
     * (Bear in mind you need to normalize PTB tokens yourself inside the renderWord parameter.)
     * Allows you to specify how to render spaces and words so you can use this to create interactive DOM elements in JS.
-    * And it's M O N A D I C C
+    * And it's monadic.
     */
   def renderM[Word, F[_]: Foldable, M[_] : Monad, Result : Monoid](
     words: F[Word],
@@ -100,19 +100,44 @@ object Text {
     }.map(_._1)
   }
 
-  def render[Word, F[_]: Foldable, M](
+  /** Non-monadic convenience method for renderM */
+  def render[Word, F[_]: Foldable, M : Monoid](
     words: F[Word],
     getToken: Word => String,
     spaceFromNextWord: Word => M,
-    renderWord: Word => M)(
-    implicit M: Monoid[M]): M = {
+    renderWord: Word => M): M = {
     renderM[Word, F, Id, M](words, getToken, spaceFromNextWord, renderWord)
   }
 
-  /** Convenience method for rendering a sequence of PTB tokens directly to a string. */
-  def render(words: Seq[String]): String =
-    render[String, List, String](words.toList, identity, _ => " ", normalizeToken)
+  /** Monadic convenience method for rendering anything that HasTokens */
+  def renderM[A : HasTokens, M[_] : Monad, Result : Monoid](
+    input: A,
+    spaceFromNextToken: String => M[Result],
+    renderToken: String => M[Result]): M[Result] =
+    renderM[String, Vector, M, Result](input.tokens, identity, spaceFromNextToken, renderToken)
 
-  def renderSpan(reference: Seq[String], span: Set[Int]) =
-    render(reference.zipWithIndex.filter(p => span.contains(p._2)).map(_._1))
+  /** Non-monadic convenience method for rendering anything that HasTokens */
+  def render[A : HasTokens, M : Monoid](
+    input: A,
+    spaceFromNextToken: String => M,
+    renderToken: String => M): M = {
+    renderM[String, Vector, Id, M](input.tokens, identity, spaceFromNextToken, renderToken)
+  }
+
+  /** Convenience method for rendering something that HasTokens directly to a string */
+  def render[A : HasTokens](input: A): String = render[A, String](input, _ => " ", normalizeToken)
+
+  /** Convenience method for rendering a sequence of PTB tokens directly to a string. */
+  def render[F[_] : Foldable](tokens: F[String]): String =
+    render[String, F, String](tokens, identity, _ => " ", normalizeToken)
+
+  // TODO make these respect spaces so the result is ACTUALLY always a substring
+
+  /** Render a substring of a list of tokens */
+  def renderSpan[F[_] : Foldable](reference: F[String], span: Set[Int]) =
+    render(reference.toList.zipWithIndex.filter(p => span.contains(p._2)).map(_._1))
+
+  /** Render a substring of a something that HasTokens */
+  def renderSpan[A : HasTokens](reference: A, span: Set[Int]) =
+    render(reference.tokens.zipWithIndex.filter(p => span.contains(p._2)).map(_._1))
 }

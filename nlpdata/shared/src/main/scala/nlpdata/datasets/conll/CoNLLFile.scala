@@ -1,6 +1,7 @@
 package nlpdata.datasets.conll
 
 import nlpdata.structure._
+import nlpdata.util._
 
 /** Represents a single CoNLL annotation file.
   *
@@ -28,6 +29,15 @@ case class CoNLLSentence(
     // nerSpans: Nothing, // TODO
     // corefSpans: List[CorefSpan] // TODO
 )
+
+object CoNLLSentence {
+
+  implicit object CoNLLSentenceHasTokens extends HasTokens[CoNLLSentence] {
+    override def getTokens(sentence: CoNLLSentence): Vector[String] =
+      sentence.words.map(_.token).toVector
+  }
+
+}
 
 /** Represents a path to a CoNLL file.
   * Contains only the suffix of the path after `annotations`,

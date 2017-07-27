@@ -5,6 +5,7 @@ import nlpdata.datasets.ptb._
 import nlpdata.structure._
 
 import cats.Monad
+import cats.implicits._
 
 import scala.util.{Try, Success, Failure}
 
@@ -81,7 +82,7 @@ class QASRLFileSystemService(
                       framesetId = "")
                     val arguments = questions.toList.flatMap { line =>
                       val (qCols, aCol) = line.split("\t").splitAt(8)
-                      val question = Text.render(qCols.toSeq.filterNot(_ == "_")).capitalize
+                      val question = Text.render(qCols.toList.filterNot(_ == "_")).capitalize
                       val fullAnswerIndices = aCol.head.split("###").toList.map(_.trim).map { aTokenString =>
                         val indexInSentence = sentence.toLowerCase.indexOf(aTokenString.toLowerCase)
                         if(indexInSentence < 0) {

@@ -1,19 +1,12 @@
 package nlpdata.datasets
 
 import scala.util.Try
+
 import nlpdata.structure._
 
+import cats.implicits._
+
 package object propbank {
-
-  implicit class PropBankText(val tr: nlpdata.util.Text.type) extends AnyVal {
-    def render(sentence: PropBankSentence): String = {
-      tr.render(sentence.words.map(_.token))
-    }
-
-    def renderSpan(sentence: PropBankSentence, span: Set[Int]) = {
-      tr.render(sentence.words.map(_.token).zipWithIndex.filter(p => span.contains(p._2)).map(_._1))
-    }
-  }
 
   /** Provides parsing of argument spans. */
   object Parsing {

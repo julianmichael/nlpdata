@@ -1,6 +1,7 @@
 package nlpdata.datasets.propbank
 
 import nlpdata.structure._
+import nlpdata.util._
 
 case class PropBankFile(
   path: PropBankPath,
@@ -38,6 +39,15 @@ case class PropBankSentence(
     }
     (newWords, newPAS)
   }
+}
+
+object PropBankSentence {
+
+  implicit object PropBankSentenceHasTokens extends HasTokens[PropBankSentence] {
+    override def getTokens(sentence: PropBankSentence): Vector[String] =
+      sentence.words.map(_.token).toVector
+  }
+
 }
 
 case class PropBankPath(get: String)

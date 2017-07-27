@@ -17,6 +17,11 @@ package object util extends PackagePlatformExtensions {
   def simpleTokenize(s: String): Vector[String] =
     s.split("(\\s+|[.,;!?.'\"])").toVector
 
+  /** Extension method / operation for the HasTokens typeclass. */
+  implicit class HasTokensOps[A](a: A)(implicit ht: HasTokens[A]) {
+    def tokens: Vector[String] = ht.getTokens(a)
+  }
+
   /* Welcome to the new world.
    * The world of ad-hoc refinement types requiring nothing more from the user than a single method call.
    * NO MORE WILL YOU BE UNCERTAIN, ON THE FIRST LINE OF YOUR METHOD,
@@ -73,7 +78,7 @@ package object util extends PackagePlatformExtensions {
 
   // == smart matchers ==
 
-  object IntMatch {
+  protected[nlpdata] object IntMatch {
     val IntMatchRegex = "(\\d+)".r
     def unapply(s: String): Option[Int] = s match {
       case IntMatchRegex(num) => Some(num.toInt)
@@ -81,23 +86,9 @@ package object util extends PackagePlatformExtensions {
     }
   }
 
-  // == Extension methods ==
+  // == Extension methods etc ==
 
   protected[nlpdata] def const[A](a: A): Any => A = _ => a
-
-  // TODO make this return an option
-  protected[nlpdata] implicit class RichSeq[A](val a: Seq[A]) extends AnyVal {
-    def mean(implicit N: Numeric[A]): Double = N.toDouble(a.sum) / a.size
-    def sse(implicit N: Numeric[A]): Double = {
-      val m = a.mean
-      a.map(x => math.pow(N.toDouble(x) - m, 2)).sum
-    }
-    def variance(implicit N: Numeric[A]) = a.sse / a.size
-    def varianceSample(implicit N: Numeric[A]) = a.sse / (a.size - 1)
-
-    def stdev(implicit N: Numeric[A]) = math.sqrt(a.variance)
-    def stdevSample(implicit N: Numeric[A]) = math.sqrt(a.varianceSample)
-  }
 
   protected[nlpdata] implicit class RichList[A](val a: List[A]) extends AnyVal {
     def remove(i: Int) = a.take(i) ++ a.drop(i + 1)
@@ -109,38 +100,11 @@ package object util extends PackagePlatformExtensions {
     def wrapNullable: Option[A] = if(a == null) None else Some(a) // TODO probably Option(A) works here
   }
 
-  protected[nlpdata] implicit class RichValForFunctions[A](val a: A) extends AnyVal {
-    def <|[B] (f: A => B): B = f(a)
-  }
-
   protected[nlpdata] implicit class RichValForLists[A](val a: A) extends AnyVal {
     def unfoldList[B](f: A => Option[(B, A)]): List[B] = f(a) match {
       case None => Nil
       case Some((head, tailToGo)) => head :: tailToGo.unfoldList(f)
     }
     def unfoldList[B](f: PartialFunction[A, (B, A)]): List[B] = a.unfoldList(f.lift)
-  }
-
-  protected[nlpdata] implicit class RichTry[A](val t: Try[A]) extends AnyVal {
-    def toOptionPrinting: Option[A] = t match {
-      case Success(a) =>
-        Some(a)
-      case Failure(e) =>
-        System.err.println(e.getLocalizedMessage)
-        e.printStackTrace()
-        None
-    }
-  }
-
-  protected[nlpdata] implicit class RichIterator[A](val t: Iterator[A]) extends AnyVal {
-    def nextOption: Option[A] = if(t.hasNext) Some(t.next) else None
-  }
-
-  protected[nlpdata] implicit class RichMutableStack[A](val s: mutable.Stack[A]) extends AnyVal {
-    def popOption: Option[A] = if(!s.isEmpty) Some(s.pop) else None
-  }
-
-  protected[nlpdata] implicit class RichMutableQueue[A](val q: mutable.Queue[A]) extends AnyVal {
-    def dequeueOption: Option[A] = if(!q.isEmpty) Some(q.dequeue) else None
   }
 }

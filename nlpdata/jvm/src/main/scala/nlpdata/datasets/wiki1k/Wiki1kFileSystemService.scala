@@ -152,7 +152,7 @@ class Wiki1kFileSystemService(
       if(Files.exists(fullPath)) {
         System.err.println(s"File already exists: $title ($id)")
       }
-      Try(Files.write(fullPath, fileString.getBytes)).toOptionPrinting
+      Try(Files.write(fullPath, fileString.getBytes))
     }
 
     pageIds.iterator.map { pageId =>

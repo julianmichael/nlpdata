@@ -5,9 +5,9 @@ import nlpdata.util._
 
 import scala.util.Try
 
-package object ptb {
-  implicit object PTBSentenceHasTokens extends HasTokens[PTBSentence] {
-    override def getTokens(sentence: PTBSentence): Vector[String] =
+package object ptb3 {
+  implicit object PTB3SentenceHasTokens extends HasTokens[PTB3Sentence] {
+    override def getTokens(sentence: PTB3Sentence): Vector[String] =
       sentence.words.filter(_.pos != "-NONE-").map(_.token)
   }
 
@@ -32,8 +32,12 @@ package object ptb {
           _ <- State.set(index + 1)
         } yield SyntaxTreeLeaf(Word(index, pos, token)): SyntaxTree
       }
+    // This is not what the data is SUPPOSED to look like, but it does in the brown corpus because horribleness.
+    // so we add a TOP node to every tree to hold all of the top-level labeled trees in each example.
+    private[this] val allTreesP: P[List[SyntaxTree]] =
+      P("(" ~ " ".? ~ treeP.rep(1) ~ ")").map(_.toList.sequence.runA(0).value)
     private[this] val fullTreeP: P[SyntaxTree] =
-      P("(" ~ " ".? ~ treeP ~ ")").map(_.runA(0).value)
+      allTreesP.map(SyntaxTreeNode("TOP", _))
 
     /** Parses a SyntaxTree from its flattened column representation in the CoNLL data.
       *
@@ -53,15 +57,16 @@ package object ptb {
       *
       * @param lines the lines of a PTB file
       */
-    def readFile(lines: Iterator[String]): PTBFile = {
+    def readFile(path: PTB3Path, lines: Iterator[String]): PTB3File = {
       val (sentences, lastChunk, lastIndex) = lines
-        .foldLeft((List.empty[PTBSentence], List.empty[String], 0)) {
+        .dropWhile(_.startsWith("*")) // to get rid of copyright comments in Brown corpus
+        .foldLeft((List.empty[PTB3Sentence], List.empty[String], 0)) {
         case ((prevSentences, curLines, sentenceNum), line) =>
           if(line.isEmpty) {
             (prevSentences, curLines, sentenceNum)
           } else if(!line.startsWith(" ") && !curLines.isEmpty) {
             val tree = readSyntaxTree(curLines.reverse.map(_.dropWhile(_ == ' ')).mkString)
-            val sentence = PTBSentence(sentenceNum, tree.words, tree)
+            val sentence = PTB3Sentence(PTB3SentencePath(path, sentenceNum), tree.words, tree)
             (sentence :: prevSentences, line :: Nil, sentenceNum + 1)
           } else {
             (prevSentences, line :: curLines, sentenceNum)
@@ -69,9 +74,9 @@ package object ptb {
       }
       val lastSentence = {
         val tree = readSyntaxTree(lastChunk.reverse.map(_.dropWhile(_ == ' ')).mkString)
-        PTBSentence(lastIndex, tree.words, tree)
+        PTB3Sentence(PTB3SentencePath(path, lastIndex), tree.words, tree)
       }
-      PTBFile((lastSentence :: sentences).toVector.reverse)
+      PTB3File(path, (lastSentence :: sentences).toVector.reverse)
     }
   }
 }

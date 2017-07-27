@@ -5,33 +5,6 @@ import nlpdata.util._
 package object wiki1k {
   val wiki1kDomains = List("wikipedia", "wikinews")
 
-  case class Wiki1kPath(domain: String, suffix: String) {
-    def get: String = s"$domain/$suffix.txt"
-  }
-  case class Wiki1kSentencePath(filePath: Wiki1kPath, paragraphNum: Int, sentenceNum: Int)
-
-  case class Wiki1kFile(
-    path: Wiki1kPath,
-    id: String,
-    revId: String,
-    title: String,
-    paragraphs: Vector[Vector[Wiki1kSentence]])
-  case class Wiki1kSentence(path: Wiki1kSentencePath, tokens: Vector[String])
-
-  implicit class Wiki1kText(val tr: Text.type) extends AnyVal {
-    def getTokens(sentence: Wiki1kSentence): Vector[String] = {
-      sentence.tokens
-    }
-
-    def render(sentence: Wiki1kSentence) = {
-      tr.render(getTokens(sentence))
-    }
-
-    def renderSpan(sentence: Wiki1kSentence, span: Set[Int]) = {
-      tr.render(getTokens(sentence).zipWithIndex.filter(p => span.contains(p._2)).map(_._1))
-    }
-  }
-
   object Parsing {
     def readFile(path: Wiki1kPath, lines: Iterator[String]): Wiki1kFile = {
       val id = lines.next
