@@ -19,6 +19,27 @@ class Inflections(
 
   import Inflections._
 
+  /** Returns the inflected forms for the given verb if it is in the dictionary
+    *
+    * Also note that this does not necessarily handle auxiliary verbs (be/do).
+    * TODO: handle these in the future?
+    *
+    * @param word a verb (stem not necessary)
+    * @return the inflections of the given verb
+    */
+  def getWellTypedInflectedForms(word: LowerCaseString): Option[InflectedForms] =
+    Option(inflDict.getBestInflections(word)).map { l =>
+      val forms = l.map(_.lowerCase)
+      InflectedForms(
+        stem = forms(0),
+        present = forms(1),
+        presentParticiple = forms(2),
+        past = forms(3),
+        pastParticiple = forms(4))
+    }
+
+  // remove in favor of well-typed version
+  @Deprecated
   /** Returns a list of inflected forms for the given verb if it is in the dictionary
     *
     * Format of result if present:
