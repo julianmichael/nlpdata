@@ -19,17 +19,25 @@ class Inflections(
 
   import Inflections._
 
-  /** Returns the inflected forms for the given verb if it is in the dictionary
+  /** Returns the inflected forms for the given verb if it is in the dictionary.
+    * If it's hyphenated, operates on the suffix after the first hyphen
+    * and replaces the prefix at the beginning.
     *
-    * Also note that this does not necessarily handle auxiliary verbs (be/do).
+    * Also note that this does not handle be-verbs.
     * TODO: handle these in the future?
     *
     * @param word a verb (stem not necessary)
     * @return the inflections of the given verb
     */
-  def getWellTypedInflectedForms(word: LowerCaseString): Option[InflectedForms] =
-    Option(inflDict.getBestInflections(word)).map { l =>
-      val forms = l.map(_.lowerCase)
+  def getWellTypedInflectedForms(verb: LowerCaseString): Option[InflectedForms] = {
+    val (verbPrefixOpt, verbSuffix) = verb.indexOf("-") match {
+      case -1 => (None, verb)
+      case i => (Some(verb.substring(0, i)), verb.substring(i + 1))
+    }
+    Option(inflDict.getBestInflections(verbSuffix)).map { l =>
+      val forms = verbPrefixOpt.fold(l.map(_.lowerCase))(prefix =>
+        l.map(suffix => s"$prefix-$suffix".lowerCase)
+      )
       InflectedForms(
         stem = forms(0),
         present = forms(1),
@@ -37,6 +45,7 @@ class Inflections(
         past = forms(3),
         pastParticiple = forms(4))
     }
+  }
 
   // remove in favor of well-typed version
   @Deprecated
