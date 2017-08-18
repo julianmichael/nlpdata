@@ -8,4 +8,6 @@ case class InflectedForms(
   present: LowerCaseString,
   presentParticiple: LowerCaseString,
   past: LowerCaseString,
-  pastParticiple: LowerCaseString)
+  pastParticiple: LowerCaseString) {
+  def allForms: List[LowerCaseString] = List(stem, present, presentParticiple, past, pastParticiple)
+}

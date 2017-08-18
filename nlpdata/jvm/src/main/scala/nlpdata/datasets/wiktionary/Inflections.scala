@@ -7,7 +7,7 @@ import nlpdata.util.LowerCaseStrings._
   *
   * Backed by Java code (VerbInflectionDictionary)
   * that loads a list of verb forms from a local text file that was scraped
-  * from Wiktionary.
+  * from Wiktionary. TODO: make it cross-platform.
   *
   * Makes heavy use of the "LowerCaseString" abstraction that ensures strings are lower case
   * on the type level.
@@ -29,7 +29,7 @@ class Inflections(
     * @param word a verb (stem not necessary)
     * @return the inflections of the given verb
     */
-  def getWellTypedInflectedForms(verb: LowerCaseString): Option[InflectedForms] = {
+  def getInflectedForms(verb: LowerCaseString): Option[InflectedForms] = {
     val (verbPrefixOpt, verbSuffix) = verb.indexOf("-") match {
       case -1 => (None, verb)
       case i => (Some(verb.substring(0, i)), verb.substring(i + 1))
@@ -47,23 +47,6 @@ class Inflections(
     }
   }
 
-  // remove in favor of well-typed version
-  @Deprecated
-  /** Returns a list of inflected forms for the given verb if it is in the dictionary
-    *
-    * Format of result if present:
-    * List(stem, present, present participle, past, past participle)
-    *      0     1        2                   3     4
-    *
-    * Also note that this does not necessarily handle auxiliary verbs (be/do).
-    * TODO: handle these in the future
-    *
-    * @param word a verb (stem not necessary)
-    * @return the inflections of the given verb
-    */
-  def getInflectedForms(word: LowerCaseString): Option[List[LowerCaseString]] =
-    Option(inflDict.getBestInflections(word)).map(l => l.map(_.lowerCase).toList)
-
   /** Returns a set of all known inflected forms of a verb.
     *
     * This handles auxiliary & other verbs. It is designed to also include irregular forms,
@@ -77,7 +60,7 @@ class Inflections(
   def getAllForms(word: LowerCaseString): Set[LowerCaseString] = {
     val extras: Set[LowerCaseString] = extraForms.get(getUninflected(word).getOrElse(word)).getOrElse(Set.empty[LowerCaseString])
     List(doVerbs, beVerbs, willVerbs, haveVerbs, wouldVerbs, negationWords).filter(_.contains(word)).headOption
-      .orElse(getInflectedForms(word).map(_.toSet))
+      .orElse(getInflectedForms(word).map(_.allForms.toSet))
       .getOrElse(Set(word)) ++ extras
   }
 

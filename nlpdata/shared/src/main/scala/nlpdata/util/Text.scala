@@ -2,6 +2,8 @@ package nlpdata.util
 
 import cats._
 
+import HasTokens.ops._
+
 /** Provides method(s) for rendering text from a list of tokens. */
 object Text {
   private val noSpaceBefore = Set(
