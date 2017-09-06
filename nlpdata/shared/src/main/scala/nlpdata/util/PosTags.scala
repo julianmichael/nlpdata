@@ -8,11 +8,13 @@ object PosTags {
   val pluralPosTags = Set("NNS", "NNPS")
   val verbPosTags = Set("VB", "VBD", "VBG", "VBN", "VBP", "VBZ")
   val whPosTags = Set("WDT", "WP", "WP$", "WRB")
+  val adjectivePosTags = Set("JJ", "JJR", "JJS")
 
   val allPosTags = Set(
-    "CC", "CD", "DT", "EX", "FW", "IN", "JJ", "JJR", "JJS", "LS",
+    "CC", "CD", "DT", "EX", "FW", "IN", // then adjectives
+    "LS",
     "MD", // then nouns
     "PDT", "POS", "PRP", "PRP$", // then adverbs
     "RP", "SYM", "TO", "UH" // then verbs, then whs
-  ) ++ nounPosTags ++ adverbPosTags ++ verbPosTags ++ whPosTags
+  ) ++ adjectivePosTags ++ nounPosTags ++ adverbPosTags ++ verbPosTags ++ whPosTags
 }

@@ -115,7 +115,7 @@ object Inflections {
   val auxiliaryVerbs =
     doVerbs ++ beVerbs ++ willVerbs ++ haveVerbs ++ modalVerbs
   val negationWords = Set(
-    "no", "not", "'nt").map(_.lowerCase)
+    "no", "not", "n't").map(_.lowerCase)
 
   /** Maps an uninflected verb to extra forms of it that aren't in wiktionary. */
   val extraForms = Map[LowerCaseString, Set[LowerCaseString]](

@@ -29,6 +29,7 @@ object Text {
   //   "'", "\"", ".", ",", "!", "?", ";", ":"
   // )
 
+  // TODO ;; -> ; ?
   /** Normalize a Penn Treebank token to its string representations. */
   def normalizeToken(token: String) = token match {
     case "`" => "'"
