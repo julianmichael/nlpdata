@@ -19,6 +19,14 @@ case class InflectedForms(
     case PastParticiple => pastParticiple
   }
 
+  def getForm(verb: LowerCaseString): Option[VerbForm] =
+    if(verb == stem) Some(Stem)
+    else if(verb == present) Some(PresentSingular3rd)
+    else if(verb == presentParticiple) Some(PresentParticiple)
+    else if(verb == past) Some(Past)
+    else if(verb == pastParticiple) Some(PastParticiple)
+    else None
+
   def allForms: List[LowerCaseString] = List(stem, present, presentParticiple, past, pastParticiple)
 }
 
