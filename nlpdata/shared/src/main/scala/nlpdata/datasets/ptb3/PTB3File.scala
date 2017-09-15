@@ -15,13 +15,22 @@ object PTB3Path {
     case WSJPathRegex(IntMatch(section), IntMatch(number)) => Some(WSJPath(section, number))
     case _ => None
   }
+
+  def toPTBPath(path: PTB3Path) = path match {
+    case WSJPath(section, number) => Some(nlpdata.datasets.ptb.PTBPath(f"$section%02d/WSJ_$section%02d$number%02d.MRG"))
+    case _ => None
+  }
 }
 
 object PTB3SentencePath {
-  def fromPTBSentencePath(
-    sentencePath: nlpdata.datasets.ptb.PTBSentencePath): Option[PTB3SentencePath] = sentencePath match {
+  def fromPTBSentencePath(sentencePath: nlpdata.datasets.ptb.PTBSentencePath) = sentencePath match {
     case nlpdata.datasets.ptb.PTBSentencePath(path, sentenceNum) =>
       PTB3Path.fromPTBPath(path).map(PTB3SentencePath(_, sentenceNum))
+  }
+
+  def toPTBSentencePath(sentencePath: PTB3SentencePath) = sentencePath match {
+    case PTB3SentencePath(path, sentenceNum) =>
+      PTB3Path.toPTBPath(path).map(nlpdata.datasets.ptb.PTBSentencePath(_, sentenceNum))
   }
 }
 
