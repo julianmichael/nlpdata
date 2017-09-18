@@ -30,6 +30,32 @@ trait CoNLLService[M[_]] {
       case GetAllSentencePaths => getAllSentencePaths
     }
   }
+
+  final def interpretThrough[G[_]: Monad](transform: M ~> G): CoNLLService[G] =
+    new CoNLLService.CompoundCoNLLService(this, transform)
+}
+
+object CoNLLService {
+  private class CompoundCoNLLService[M[_], G[_]](
+    base: CoNLLService[M],
+    transform: M ~> G)(
+    implicit M: Monad[M],
+    G: Monad[G]
+  ) extends CoNLLService[G] {
+    override protected implicit val monad = G
+
+    def getFile(path: CoNLLPath): G[CoNLLFile] =
+      transform(base.getFile(path))
+
+    def getAllPaths: G[List[CoNLLPath]] =
+      transform(base.getAllPaths)
+
+    override def getSentence(path: CoNLLSentencePath): G[CoNLLSentence] =
+      transform(base.getSentence(path))
+
+    override def getAllSentencePaths: G[List[CoNLLSentencePath]] =
+      transform(base.getAllSentencePaths)
+  }
 }
 
 sealed trait CoNLLServiceRequestA[A]
