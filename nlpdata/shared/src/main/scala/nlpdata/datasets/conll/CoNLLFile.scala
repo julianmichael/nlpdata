@@ -22,6 +22,7 @@ case class CoNLLFile(
   */
 case class CoNLLSentence(
   path: CoNLLSentencePath,
+  partNum: Int,
   words: List[Word],
   syntaxTree: SyntaxTree,
   predicateArgumentStructures: List[PredicateArgumentStructure]
@@ -77,8 +78,7 @@ object CoNLLPath {
   */
 case class CoNLLSentencePath(
   filePath: CoNLLPath,
-  partNum: Int,
   sentenceNum: Int
 ) {
-  override def toString = s"${filePath.suffix}:$partNum:$sentenceNum"
+  override def toString = s"${filePath.suffix}:$sentenceNum"
 }

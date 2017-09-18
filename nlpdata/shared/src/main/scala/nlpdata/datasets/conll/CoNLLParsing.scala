@@ -66,8 +66,8 @@ object CoNLLParsing {
       spansString = lineArrays.map(arr => arr(11 + num)).fold
       argSpans = propbank.Parsing.readArgumentSpans(spansString, words)
     } yield PredicateArgumentStructure(pred, argSpans)
-    val sentencePath = CoNLLSentencePath(path, partNum, sentenceNum)
-    CoNLLSentence(sentencePath, words, tree, paStructures)
+    val sentencePath = CoNLLSentencePath(path, sentenceNum)
+    CoNLLSentence(sentencePath, partNum, words, tree, paStructures)
   }
 
   private[this] val firstLineRegex = """#begin document \((.*)\); part ([0-9]+)""".r
