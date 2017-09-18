@@ -9,7 +9,7 @@ import nlpdata.util._
   * @param sentences all of the sentences in the annotation file
   */
 case class CoNLLFile(
-  id: String,
+  path: CoNLLPath,
   sentences: Vector[CoNLLSentence]
 )
 
@@ -21,14 +21,15 @@ case class CoNLLFile(
   * if necessary ask me (Julian) and I can put them in.
   */
 case class CoNLLSentence(
-  // partNum: Int,
-  sentenceNum: Int,
+  path: CoNLLSentencePath,
   words: List[Word],
   syntaxTree: SyntaxTree,
   predicateArgumentStructures: List[PredicateArgumentStructure]
     // nerSpans: Nothing, // TODO
     // corefSpans: List[CorefSpan] // TODO
-)
+) {
+  def sentenceNum = path.sentenceNum
+}
 
 object CoNLLSentence {
 
@@ -39,13 +40,31 @@ object CoNLLSentence {
 
 }
 
-/** Represents a path to a CoNLL file.
-  * Contains only the suffix of the path after `annotations`,
-  * ignoring the absolute path to the CoNLL 2012 data.
-  *
-  * @param get the file path suffix
-  */
-case class CoNLLPath(get: String)
+case class CoNLLPath(
+  split: String, // development, train
+  language: String, // arabic, chinese, english
+  domain: String, // depends on language; e.g., nw, bc, wb
+  source: String, // e.g., wsj, xinhua
+  section: Int, // always falls within 0-99
+  name: String, // filename prefix, usually equal to source
+  number: Int // always falls within 0-99
+) {
+  def documentId = f"$domain%s/$source%s/$section%02d/$name%s_$section%02d$number%02d"
+  def suffix = s"v4/data/$split/data/$language/annotations/$documentId.v4_gold_conll"
+}
+
+object CoNLLPath {
+  private[this] val pathSuffixRegex =
+    """v4/data/(.*?)/data/(.*?)/annotations/(.*?)/(.*?)/([0-9]{2})/(.*?)_[0-9]{2}([0-9]{2}).v4_gold_conll""".r
+  private[this] object IntMatch {
+    def unapply(s: String): Option[Int] = scala.util.Try(s.toInt).toOption
+  }
+  def fromPathSuffix(s: String): Option[CoNLLPath] = s match {
+    case pathSuffixRegex(split, language, domain, source, IntMatch(section), name, IntMatch(number)) =>
+      Some(CoNLLPath(split, language, domain, source, section, name, number))
+    case _ => None
+  }
+}
 
 /** Represents a unique index to a CoNLL sentence.
   *
@@ -58,7 +77,8 @@ case class CoNLLPath(get: String)
   */
 case class CoNLLSentencePath(
   filePath: CoNLLPath,
+  partNum: Int,
   sentenceNum: Int
 ) {
-  override def toString = s"${filePath.get}:$sentenceNum"
+  override def toString = s"${filePath.suffix}:$partNum:$sentenceNum"
 }

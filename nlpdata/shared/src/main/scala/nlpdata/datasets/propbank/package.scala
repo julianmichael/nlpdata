@@ -63,7 +63,7 @@ package object propbank {
       val lineArrays = lines.map(_.split("\\s+"))
       val words = lineArrays.map(arr => Word(arr(2).toInt, arr(4), arr(3)))
       val treeString = lineArrays.map(arr => arr(5)).mkString
-      val tree = conll.Parsing.readSyntaxTree(treeString, words)
+      val tree = conll.CoNLLParsing.readSyntaxTree(treeString, words)
       val predicates = for {
         (arr, index) <- lineArrays.zipWithIndex
         predicateLemma = arr(6)

@@ -18,7 +18,7 @@ import nlpdata.structure.SyntaxTree
 
 trait PTB3Service[M[_]] {
 
-  protected implicit val monad: Monad[M]
+  implicit protected val monad: Monad[M]
 
   def getFile(path: PTB3Path): M[PTB3File]
 
