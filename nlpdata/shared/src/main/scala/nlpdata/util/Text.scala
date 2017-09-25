@@ -25,6 +25,11 @@ object Text {
     "(", "[", "{"
   )
 
+  // what does this mean... lol... it appears in the bc (broadcast conversation) domain of OntoNotes
+  private val hidden = Set(
+    "%pw"
+  )
+
   // val sentenceEndings = Set(
   //   "'", "\"", ".", ",", "!", "?", ";", ":"
   // )
@@ -43,6 +48,7 @@ object Text {
     case "-RSB-" => "]"
     case "/." => "."
     case "/?" => "?"
+    case "/-" => "-"
     case "--" => "-"
     case w => w.replaceAll("\\\\/", "/")
   }
@@ -67,37 +73,40 @@ object Text {
     words.foldM[M, (Result, Boolean, Boolean, Boolean)]((Monoid[Result].empty, true, false, false)) {
       case ((acc, skipSpace, insideSingleQuotes, insideDoubleQuotes), word) =>
         val token = getToken(word)
-
-        val (skipPrevSpace, skipNextSpace, nowInsideSingleQuotes, nowInsideDoubleQuotes) =
-          if(hasSingleQuoteOnly && token == "'") (
-            true, false, false, insideDoubleQuotes
-          ) else (
-            // skip prev space
-            skipSpace ||
-              (insideSingleQuotes && token.equals("'")) ||
-              (insideDoubleQuotes && (token.equals("''") || token.equals("\""))),
-            // skip next space
-            noSpaceAfter.contains(normalizeToken(token)) ||
-              (!insideSingleQuotes && (token.equals("`") || token.equals("'"))) ||
-              (!insideDoubleQuotes && (token.equals("``") || token.equals("\""))),
-            // now inside single
-            (token.equals("'") || token.equals("`")) ^ insideSingleQuotes,
-            // now inside double
-            (token.equals("''") || token.equals("``") || token.equals("\"")) ^ insideDoubleQuotes
-          )
-
-        if(skipPrevSpace || noSpaceBefore.contains(normalizeToken(token))) {
-          for {
-            w <- renderWord(word)
-          } yield {
-            (acc |+| w, skipNextSpace, nowInsideSingleQuotes, nowInsideDoubleQuotes)
-          }
+        if(hidden.contains(token)) { // skip token / do nothing
+          Monad[M].pure((acc, skipSpace, insideSingleQuotes, insideDoubleQuotes))
         } else {
-          for {
-            space <- spaceFromNextWord(word)
-            w <- renderWord(word)
-          } yield {
-            (acc |+| space |+| w, skipNextSpace, nowInsideSingleQuotes, nowInsideDoubleQuotes)
+          val (skipPrevSpace, skipNextSpace, nowInsideSingleQuotes, nowInsideDoubleQuotes) =
+            if(hasSingleQuoteOnly && token == "'") (
+              true, false, false, insideDoubleQuotes
+            ) else (
+              // skip prev space
+              skipSpace ||
+                (insideSingleQuotes && token.equals("'")) ||
+                (insideDoubleQuotes && (token.equals("''") || token.equals("\""))),
+              // skip next space
+              noSpaceAfter.contains(normalizeToken(token)) ||
+                (!insideSingleQuotes && (token.equals("`") || token.equals("'"))) ||
+                (!insideDoubleQuotes && (token.equals("``") || token.equals("\""))),
+              // now inside single
+              (token.equals("'") || token.equals("`")) ^ insideSingleQuotes,
+              // now inside double
+              (token.equals("''") || token.equals("``") || token.equals("\"")) ^ insideDoubleQuotes
+            )
+
+          if(skipPrevSpace || noSpaceBefore.contains(normalizeToken(token))) {
+            for {
+              w <- renderWord(word)
+            } yield {
+              (acc |+| w, skipNextSpace, nowInsideSingleQuotes, nowInsideDoubleQuotes)
+            }
+          } else {
+            for {
+              space <- spaceFromNextWord(word)
+              w <- renderWord(word)
+            } yield {
+              (acc |+| space |+| w, skipNextSpace, nowInsideSingleQuotes, nowInsideDoubleQuotes)
+            }
           }
         }
     }.map(_._1)
