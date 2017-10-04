@@ -14,3 +14,7 @@ import scala.language.implicitConversions
 
   override def getTokens(a: A): Vector[String] = getAlignedTokens(a).map(_.token)
 }
+
+object HasAlignedTokens {
+  object strictOps extends ToHasAlignedTokensOps
+}
