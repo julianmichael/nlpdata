@@ -9,7 +9,11 @@ object PosTags {
   val verbPosTags = Set("VB", "VBD", "VBG", "VBN", "VBP", "VBZ")
   val whPosTags = Set("WDT", "WP", "WP$", "WRB")
   val adjectivePosTags = Set("JJ", "JJR", "JJS")
-  val symbolPosTags = Set(".", "$") // there may be others.
+  val symbolPosTags = Set(
+    ".", "$",
+    "-LRB-", "-LCB-", "-LSB-",
+    "-RRB-", "-RCB-", "-RSB-"
+  ) // there may be others.
 
   val allPosTags = Set(
     "CC", "CD", "DT", "EX", "FW", "IN", // then adjectives
