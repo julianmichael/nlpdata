@@ -25,6 +25,8 @@ sealed trait LowerCaseStringCapsule0 {
     def lowerCase(s: String): LowerCaseString
     def +(s1: LowerCaseString, s2: LowerCaseString): LowerCaseString
     def contains(s1: LowerCaseString, s2: LowerCaseString): Boolean
+    def startsWith(s1: LowerCaseString, s2: LowerCaseString): Boolean
+    def endsWith(s1: LowerCaseString, s2: LowerCaseString): Boolean
     def substring(s: LowerCaseString, beginIndex: Int): LowerCaseString
     def substring(s: LowerCaseString, beginIndex: Int, endIndex: Int): LowerCaseString
   }
@@ -42,6 +44,8 @@ protected[util] object LowerCaseStringsImpl extends LowerCaseStringCapsule {
     override def lowerCase(s: String): LowerCaseString = s.toLowerCase
     override def +(s1: LowerCaseString, s2: LowerCaseString) = s1 + s2
     override def contains(s1: LowerCaseString, s2: LowerCaseString) = s1 contains s2
+    override def startsWith(s1: LowerCaseString, s2: LowerCaseString) = s1 startsWith s2
+    override def endsWith(s1: LowerCaseString, s2: LowerCaseString) = s1 endsWith s2
     override def substring(s: LowerCaseString, beginIndex: Int) = s.substring(beginIndex)
     override def substring(s: LowerCaseString, beginIndex: Int, endIndex: Int) = s.substring(beginIndex, endIndex)
   }
@@ -59,6 +63,8 @@ import LowerCaseStrings.LowerCaseString
 protected[util] class LowerCaseStringWrapper(val lcs: LowerCaseString) extends AnyVal {
   def +(other: LowerCaseString): LowerCaseString = LowerCaseStrings.LowerCaseStringOpsImpl.+(lcs, other)
   def contains(other: LowerCaseString): Boolean = LowerCaseStrings.LowerCaseStringOpsImpl.contains(lcs, other)
+  def startsWith(other: LowerCaseString): Boolean = LowerCaseStrings.LowerCaseStringOpsImpl.startsWith(lcs, other)
+  def endsWith(other: LowerCaseString): Boolean = LowerCaseStrings.LowerCaseStringOpsImpl.endsWith(lcs, other)
   def substring(beginIndex: Int): LowerCaseString = LowerCaseStrings.LowerCaseStringOpsImpl.substring(lcs, beginIndex)
   def substring(beginIndex: Int, endIndex: Int): LowerCaseString = LowerCaseStrings.LowerCaseStringOpsImpl.substring(lcs, beginIndex, endIndex)
 }
