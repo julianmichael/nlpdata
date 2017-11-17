@@ -156,6 +156,8 @@ object Text {
   def renderSpan[A : HasTokens](reference: A, span: Set[Int]) =
     render(reference.tokens.toList.zipWithIndex.filter(p => span.contains(p._2)).map(_._1))
 
+  // TODO implement span re-recovery from a string
+
   // aligned text rendering
 
   /** Returns a correct rendering of aligned tokens that preserves their whitespace. */
@@ -226,7 +228,7 @@ object Text {
       (_: Option[AlignedToken], space: String, _: Option[AlignedToken]) => space,
       (alignedToken: AlignedToken) => alignedToken.originalText)
 
-  def renderAligned[A : HasAlignedTokens](input: A): String = 
+  def renderAligned[A : HasAlignedTokens](input: A): String =
     renderAligned[A, String](
       input,
       (_: Option[AlignedToken], space: String, _: Option[AlignedToken]) => space,

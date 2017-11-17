@@ -1,5 +1,7 @@
 package nlpdata.util
 
+import cats.Show
+
 import scala.language.implicitConversions
 
 /* Welcome to the new world.
@@ -36,6 +38,7 @@ sealed trait LowerCaseStringCapsule0 {
 sealed trait LowerCaseStringCapsule extends LowerCaseStringCapsule0 {
   implicit def wrapLowerCaseString(lcs: LowerCaseString): LowerCaseStringWrapper
   implicit def wrapStringToMakeLowerCase(s: String): StringToLowerCaseWrapper
+  implicit def lowerCaseStringShow: Show[LowerCaseString]
 }
 
 protected[util] object LowerCaseStringsImpl extends LowerCaseStringCapsule {
@@ -55,6 +58,9 @@ protected[util] object LowerCaseStringsImpl extends LowerCaseStringCapsule {
     new LowerCaseStringWrapper(lcs.asInstanceOf[LowerCaseStrings.LowerCaseString]) // refers to upcasted version of this object
   override implicit def wrapStringToMakeLowerCase(s: String) =
     new StringToLowerCaseWrapper(s)
+  override implicit val lowerCaseStringShow: Show[LowerCaseString] = new Show[LowerCaseString] {
+    override def show(lcs: LowerCaseString): String = lcs.toString
+  }
 }
 
 // take value with opaque-sealed type from the package object
