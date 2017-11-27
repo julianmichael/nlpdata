@@ -1,15 +1,13 @@
 package nlpdata.datasets
 
-import nlpdata.structure._
-import nlpdata.util._
+import nlpdata.structure.SyntaxTree
+import nlpdata.structure.SyntaxTreeNode
+import nlpdata.structure.SyntaxTreeLeaf
+import nlpdata.structure.Word
 
 import scala.util.Try
 
 package object ptb {
-  implicit object PTBSentenceHasTokens extends HasTokens[PTBSentence] {
-    override def getTokens(sentence: PTBSentence): Vector[String] =
-      sentence.words.filter(_.pos != "-NONE-").map(_.token)
-  }
 
   object Parsing {
     import cats._
