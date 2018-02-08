@@ -1,6 +1,8 @@
 package nlpdata.util
 
 import cats.Show
+import cats.Order
+import cats.Monoid
 
 import scala.language.implicitConversions
 
@@ -39,6 +41,8 @@ sealed trait LowerCaseStringCapsule extends LowerCaseStringCapsule0 {
   implicit def wrapLowerCaseString(lcs: LowerCaseString): LowerCaseStringWrapper
   implicit def wrapStringToMakeLowerCase(s: String): StringToLowerCaseWrapper
   implicit def lowerCaseStringShow: Show[LowerCaseString]
+  implicit def lowerCaseStringMonoid: Monoid[LowerCaseString]
+  implicit def lowerCaseStringOrder: Order[LowerCaseString]
 }
 
 protected[util] object LowerCaseStringsImpl extends LowerCaseStringCapsule {
@@ -52,14 +56,36 @@ protected[util] object LowerCaseStringsImpl extends LowerCaseStringCapsule {
     override def substring(s: LowerCaseString, beginIndex: Int) = s.substring(beginIndex)
     override def substring(s: LowerCaseString, beginIndex: Int, endIndex: Int) = s.substring(beginIndex, endIndex)
   }
+
   override implicit def lowerCaseStringToString(lcs: LowerCaseString): String =
     lcs
+
   override implicit def wrapLowerCaseString(lcs: LowerCaseString) =
-    new LowerCaseStringWrapper(lcs.asInstanceOf[LowerCaseStrings.LowerCaseString]) // refers to upcasted version of this object
+    new LowerCaseStringWrapper(lcs.asInstanceOf[LowerCaseStrings.LowerCaseString]) // upcasted version of this object
+
   override implicit def wrapStringToMakeLowerCase(s: String) =
     new StringToLowerCaseWrapper(s)
+
   override implicit val lowerCaseStringShow: Show[LowerCaseString] = new Show[LowerCaseString] {
     override def show(lcs: LowerCaseString): String = lcs.toString
+  }
+
+  override implicit val lowerCaseStringMonoid: Monoid[LowerCaseString] = new Monoid[LowerCaseString] {
+    def empty: LowerCaseString = ""
+    def combine(x: LowerCaseString, y: LowerCaseString): LowerCaseString = x + y
+
+    override def combineAll(xs: TraversableOnce[LowerCaseString]): LowerCaseString = {
+      val sb = new StringBuilder
+      xs.foreach(sb.append)
+      sb.toString
+    }
+  }
+
+  override implicit val lowerCaseStringOrder: Order[LowerCaseString] = new Order[LowerCaseString] {
+
+    override def eqv(x: String, y: String): Boolean = x == y
+
+    override def compare(x: String, y: String): Int = if (x eq y) 0 else x compareTo y
   }
 }
 
