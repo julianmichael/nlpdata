@@ -4,15 +4,19 @@ package nlpdata.structure
   * TODO: children should be nonempty list
   */
 sealed trait SyntaxTree {
-  final def fold[A](leaf: Word => A)(node: (String, List[A]) => A): A = this match {
-    case SyntaxTreeLeaf(word) => leaf(word)
-    case SyntaxTreeNode(label, children) => node(label, children.map(_.fold(leaf)(node)))
-  }
+  final def fold[A](leaf: Word => A)(node: (String, List[A]) => A): A =
+    this match {
+      case SyntaxTreeLeaf(word) => leaf(word)
+      case SyntaxTreeNode(label, children) =>
+        node(label, children.map(_.fold(leaf)(node)))
+    }
 
-  final def foldUnlabeled[A](leaf: Word => A)(node: List[A] => A): A = this match {
-    case SyntaxTreeLeaf(word) => leaf(word)
-    case SyntaxTreeNode(label, children) => node(children.map(_.foldUnlabeled(leaf)(node)))
-  }
+  final def foldUnlabeled[A](leaf: Word => A)(node: List[A] => A): A =
+    this match {
+      case SyntaxTreeLeaf(word) => leaf(word)
+      case SyntaxTreeNode(label, children) =>
+        node(children.map(_.foldUnlabeled(leaf)(node)))
+    }
 
   // final def foldM[M: Monad](leaf: Word => M[A])(node: (String, List[A]) => M[A]): M[A] = this match {
   //   case SyntaxTreeLeaf(word) => leaf(word)

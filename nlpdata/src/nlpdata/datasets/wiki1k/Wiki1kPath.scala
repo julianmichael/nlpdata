@@ -12,9 +12,11 @@ case class Wiki1kFile(
   id: String,
   revId: String,
   title: String,
-  paragraphs: Vector[Vector[Wiki1kSentence]])
+  paragraphs: Vector[Vector[Wiki1kSentence]]
+)
 
 case class Wiki1kSentence(path: Wiki1kSentencePath, tokens: Vector[String])
+
 object Wiki1kSentence {
   implicit object Wiki1kSentenceHasTokens extends HasTokens[Wiki1kSentence] {
     override def getTokens(sentence: Wiki1kSentence): Vector[String] = {

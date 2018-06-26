@@ -12,7 +12,8 @@ import scala.language.implicitConversions
   /* Returns a vector of Penn Treebank style tokens. */
   @op("alignedTokens") def getAlignedTokens(a: A): Vector[AlignedToken]
 
-  override def getTokens(a: A): Vector[String] = getAlignedTokens(a).map(_.token)
+  override def getTokens(a: A): Vector[String] =
+    getAlignedTokens(a).map(_.token)
 }
 
 object HasAlignedTokens {

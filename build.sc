@@ -1,7 +1,10 @@
 import mill._, mill.scalalib._, mill.scalalib.publish._, mill.scalajslib._
+import mill.scalalib.scalafmt._
 import mill.util.Ctx
 import coursier.maven.MavenRepository
 import ammonite.ops._
+
+val thisPublishVersion = "0.1.1-SNAPSHOT"
 
 val scalaVersions = List("2.11.12", "2.12.6")
 val thisScalaJSVersion = "0.6.23"
@@ -19,7 +22,7 @@ val scalaArmVersion = "2.0"
 val corenlpVersion = "3.6.0"
 val trove4jVersion = "3.0.1"
 
-trait CommonModule extends ScalaModule {
+trait CommonModule extends ScalaModule with ScalafmtModule {
 
   def platformSegment: String
 
@@ -52,7 +55,7 @@ trait NlpdataModule extends CommonModule with PublishModule with CrossScalaModul
   def millSourcePath = build.millSourcePath / "nlpdata"
 
   def artifactName = "nlpdata"
-  def publishVersion = "0.1.0"
+  def publishVersion = thisPublishVersion
   def pomSettings = PomSettings(
     description = artifactName(),
     organization = "org.julianmichael",

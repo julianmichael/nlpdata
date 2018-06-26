@@ -9,9 +9,7 @@ package nlpdata.structure
   * @param pred the predicate of the PAS, including the head word
   * @param arguments the argument spans
   */
-case class PredicateArgumentStructure(
-  pred: Predicate,
-  arguments: List[ArgumentSpan])
+case class PredicateArgumentStructure(pred: Predicate, arguments: List[ArgumentSpan])
 
 /** Represents the predicate of a predicate--argument structure.
   *
@@ -19,10 +17,7 @@ case class PredicateArgumentStructure(
   * @param predicateLemma the predicate lemma as written in the CoNLL data
   * @param framesetId the PropBank frameset ID as written in the CoNLL data
   */
-case class Predicate(
-  head: Word,
-  predicateLemma: String,
-  framesetId: String)
+case class Predicate(head: Word, predicateLemma: String, framesetId: String)
 
 /** Represents an argument span in a predicate--argument structure.
   *

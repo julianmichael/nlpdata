@@ -50,11 +50,16 @@ protected[util] object LowerCaseStringsImpl extends LowerCaseStringCapsule {
   override object LowerCaseStringOpsImpl extends LowerCaseStringOps {
     override def lowerCase(s: String): LowerCaseString = s.toLowerCase
     override def +(s1: LowerCaseString, s2: LowerCaseString) = s1 + s2
-    override def contains(s1: LowerCaseString, s2: LowerCaseString) = s1 contains s2
-    override def startsWith(s1: LowerCaseString, s2: LowerCaseString) = s1 startsWith s2
-    override def endsWith(s1: LowerCaseString, s2: LowerCaseString) = s1 endsWith s2
-    override def substring(s: LowerCaseString, beginIndex: Int) = s.substring(beginIndex)
-    override def substring(s: LowerCaseString, beginIndex: Int, endIndex: Int) = s.substring(beginIndex, endIndex)
+    override def contains(s1: LowerCaseString, s2: LowerCaseString) =
+      s1 contains s2
+    override def startsWith(s1: LowerCaseString, s2: LowerCaseString) =
+      s1 startsWith s2
+    override def endsWith(s1: LowerCaseString, s2: LowerCaseString) =
+      s1 endsWith s2
+    override def substring(s: LowerCaseString, beginIndex: Int) =
+      s.substring(beginIndex)
+    override def substring(s: LowerCaseString, beginIndex: Int, endIndex: Int) =
+      s.substring(beginIndex, endIndex)
   }
 
   override implicit def lowerCaseStringToString(lcs: LowerCaseString): String =
@@ -66,39 +71,57 @@ protected[util] object LowerCaseStringsImpl extends LowerCaseStringCapsule {
   override implicit def wrapStringToMakeLowerCase(s: String) =
     new StringToLowerCaseWrapper(s)
 
-  override implicit val lowerCaseStringShow: Show[LowerCaseString] = new Show[LowerCaseString] {
-    override def show(lcs: LowerCaseString): String = lcs.toString
-  }
-
-  override implicit val lowerCaseStringMonoid: Monoid[LowerCaseString] = new Monoid[LowerCaseString] {
-    def empty: LowerCaseString = ""
-    def combine(x: LowerCaseString, y: LowerCaseString): LowerCaseString = x + y
-
-    override def combineAll(xs: TraversableOnce[LowerCaseString]): LowerCaseString = {
-      val sb = new StringBuilder
-      xs.foreach(sb.append)
-      sb.toString
+  override implicit val lowerCaseStringShow: Show[LowerCaseString] =
+    new Show[LowerCaseString] {
+      override def show(lcs: LowerCaseString): String = lcs.toString
     }
-  }
 
-  override implicit val lowerCaseStringOrder: Order[LowerCaseString] = new Order[LowerCaseString] {
+  override implicit val lowerCaseStringMonoid: Monoid[LowerCaseString] =
+    new Monoid[LowerCaseString] {
+      def empty: LowerCaseString = ""
 
-    override def eqv(x: String, y: String): Boolean = x == y
+      def combine(x: LowerCaseString, y: LowerCaseString): LowerCaseString =
+        x + y
 
-    override def compare(x: String, y: String): Int = if (x eq y) 0 else x compareTo y
-  }
+      override def combineAll(xs: TraversableOnce[LowerCaseString]): LowerCaseString = {
+        val sb = new StringBuilder
+        xs.foreach(sb.append)
+        sb.toString
+      }
+    }
+
+  override implicit val lowerCaseStringOrder: Order[LowerCaseString] =
+    new Order[LowerCaseString] {
+
+      override def eqv(x: String, y: String): Boolean = x == y
+
+      override def compare(x: String, y: String): Int =
+        if (x eq y) 0 else x compareTo y
+    }
 }
 
 // take value with opaque-sealed type from the package object
 import LowerCaseStrings.LowerCaseString
 
 protected[util] class LowerCaseStringWrapper(val lcs: LowerCaseString) extends AnyVal {
-  def +(other: LowerCaseString): LowerCaseString = LowerCaseStrings.LowerCaseStringOpsImpl.+(lcs, other)
-  def contains(other: LowerCaseString): Boolean = LowerCaseStrings.LowerCaseStringOpsImpl.contains(lcs, other)
-  def startsWith(other: LowerCaseString): Boolean = LowerCaseStrings.LowerCaseStringOpsImpl.startsWith(lcs, other)
-  def endsWith(other: LowerCaseString): Boolean = LowerCaseStrings.LowerCaseStringOpsImpl.endsWith(lcs, other)
-  def substring(beginIndex: Int): LowerCaseString = LowerCaseStrings.LowerCaseStringOpsImpl.substring(lcs, beginIndex)
-  def substring(beginIndex: Int, endIndex: Int): LowerCaseString = LowerCaseStrings.LowerCaseStringOpsImpl.substring(lcs, beginIndex, endIndex)
+
+  def +(other: LowerCaseString): LowerCaseString =
+    LowerCaseStrings.LowerCaseStringOpsImpl.+(lcs, other)
+
+  def contains(other: LowerCaseString): Boolean =
+    LowerCaseStrings.LowerCaseStringOpsImpl.contains(lcs, other)
+
+  def startsWith(other: LowerCaseString): Boolean =
+    LowerCaseStrings.LowerCaseStringOpsImpl.startsWith(lcs, other)
+
+  def endsWith(other: LowerCaseString): Boolean =
+    LowerCaseStrings.LowerCaseStringOpsImpl.endsWith(lcs, other)
+
+  def substring(beginIndex: Int): LowerCaseString =
+    LowerCaseStrings.LowerCaseStringOpsImpl.substring(lcs, beginIndex)
+
+  def substring(beginIndex: Int, endIndex: Int): LowerCaseString =
+    LowerCaseStrings.LowerCaseStringOpsImpl.substring(lcs, beginIndex, endIndex)
 }
 protected[util] class StringToLowerCaseWrapper(val s: String) extends AnyVal {
   def lowerCase = LowerCaseStrings.LowerCaseStringOpsImpl.lowerCase(s)

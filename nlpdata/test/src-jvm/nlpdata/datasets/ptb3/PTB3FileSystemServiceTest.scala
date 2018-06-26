@@ -5,7 +5,7 @@ import cats.implicits._
 import org.scalatest._
 import org.scalatest.prop._
 
-import scala.util.{Try, Success}
+import scala.util.{Success, Try}
 
 import java.nio.file.Paths
 

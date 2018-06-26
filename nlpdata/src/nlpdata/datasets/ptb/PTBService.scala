@@ -14,10 +14,13 @@ trait PTBService[M[_]] {
   def allPTBPaths: M[List[PTBPath]]
 
   def allPTBSentencePaths: M[List[PTBSentencePath]] = allPTBPaths >>= { ptbPaths =>
-    ptbPaths.map { ptbPath =>
-      getFile(ptbPath).map { ptbFile =>
-        ptbFile.sentences.indices.iterator.map(i => PTBSentencePath(ptbPath, i))
+    ptbPaths
+      .map { ptbPath =>
+        getFile(ptbPath).map { ptbFile =>
+          ptbFile.sentences.indices.iterator.map(i => PTBSentencePath(ptbPath, i))
+        }
       }
-    }.sequence.map(_.flatten)
+      .sequence
+      .map(_.flatten)
   }
 }

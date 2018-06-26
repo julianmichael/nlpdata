@@ -1,6 +1,3 @@
 package nlpdata.structure
 
-case class Word(
-  index: Int,
-  pos: String,
-  token: String)
+case class Word(index: Int, pos: String, token: String)

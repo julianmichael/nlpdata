@@ -18,20 +18,22 @@ package object ptb3 {
     private[this] type SentenceState[A] = State[Int, A]
 
     import fastparse.all._
-    private[this] val symbolP: P[String] = P(CharPred(c =>  !" ()".contains(c)).rep.!)
+    private[this] val symbolP: P[String] = P(CharPred(c => !" ()".contains(c)).rep.!)
     // P(CharIn('A' to 'Z', '0' to '9', "-$,.").rep.!)
-    private[this] val tokenP: P[String] = P(CharPred(c =>  !" ()".contains(c)).rep.!)
+    private[this] val tokenP: P[String] = P(CharPred(c => !" ()".contains(c)).rep.!)
     private[this] lazy val treeP: P[SentenceState[SyntaxTree]] =
-      P("(" ~ symbolP ~ " " ~ treeP.rep ~ ")").map {
-        case (symbol, childrenState) => for {
+    P("(" ~ symbolP ~ " " ~ treeP.rep ~ ")").map {
+      case (symbol, childrenState) =>
+        for {
           children <- childrenState.toList.sequence
         } yield SyntaxTreeNode(symbol, children.toList): SyntaxTree
-      } | P("(" ~ symbolP ~ " " ~ tokenP ~ ")" ~ " ".?).map {
-        case (pos, token) => for {
+    } | P("(" ~ symbolP ~ " " ~ tokenP ~ ")" ~ " ".?).map {
+      case (pos, token) =>
+        for {
           index <- State.get
-          _ <- State.set(index + 1)
+          _     <- State.set(index + 1)
         } yield SyntaxTreeLeaf(Word(index, pos, token)): SyntaxTree
-      }
+    }
     // This is not what the data is SUPPOSED to look like, but it does in the brown corpus because horribleness.
     // so we add a TOP node to every tree to hold all of the top-level labeled trees in each example.
     private[this] val allTreesP: P[List[SyntaxTree]] =
@@ -49,7 +51,6 @@ package object ptb3 {
     def readSyntaxTree(s: String): SyntaxTree =
       fullTreeP.parse(s).get.value
 
-
     /** Reads a PTBFile from an iterator over lines.
       *
       * Assumes that the given lines are taken directly from a PTB file.
@@ -61,17 +62,17 @@ package object ptb3 {
       val (sentences, lastChunk, lastIndex) = lines
         .dropWhile(_.startsWith("*")) // to get rid of copyright comments in Brown corpus
         .foldLeft((List.empty[PTB3Sentence], List.empty[String], 0)) {
-        case ((prevSentences, curLines, sentenceNum), line) =>
-          if(line.isEmpty) {
-            (prevSentences, curLines, sentenceNum)
-          } else if(!line.startsWith(" ") && !curLines.isEmpty) {
-            val tree = readSyntaxTree(curLines.reverse.map(_.dropWhile(_ == ' ')).mkString)
-            val sentence = PTB3Sentence(PTB3SentencePath(path, sentenceNum), tree.words, tree)
-            (sentence :: prevSentences, line :: Nil, sentenceNum + 1)
-          } else {
-            (prevSentences, line :: curLines, sentenceNum)
-          }
-      }
+          case ((prevSentences, curLines, sentenceNum), line) =>
+            if (line.isEmpty) {
+              (prevSentences, curLines, sentenceNum)
+            } else if (!line.startsWith(" ") && !curLines.isEmpty) {
+              val tree = readSyntaxTree(curLines.reverse.map(_.dropWhile(_ == ' ')).mkString)
+              val sentence = PTB3Sentence(PTB3SentencePath(path, sentenceNum), tree.words, tree)
+              (sentence :: prevSentences, line :: Nil, sentenceNum + 1)
+            } else {
+              (prevSentences, line :: curLines, sentenceNum)
+            }
+        }
       val lastSentence = {
         val tree = readSyntaxTree(lastChunk.reverse.map(_.dropWhile(_ == ' ')).mkString)
         PTB3Sentence(PTB3SentencePath(path, lastIndex), tree.words, tree)

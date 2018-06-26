@@ -6,61 +6,73 @@ import nlpdata.util._
 
 package object nombank {
 
-  case class SpanIndicator(
-    leftIndex: Int,
-    height: Int) {
+  case class SpanIndicator(leftIndex: Int, height: Int) {
     def upOne = copy(height = this.height + 1)
   }
 
   // for now, ignoring different kinds of linking... TODO do this perhaps
-  case class LinkedSpanIndicator(
-    label: String,
-    spanIndicators: List[SpanIndicator])
+  case class LinkedSpanIndicator(label: String, spanIndicators: List[SpanIndicator])
 
   case class NomBankEntry(
     ptbSentencePath: PTBSentencePath,
     headIndex: Int,
     predLemma: String,
     framesetId: String,
-    argSpanIndicators: List[LinkedSpanIndicator])
+    argSpanIndicators: List[LinkedSpanIndicator]
+  )
 
   // expect PTB trees, i.e., with -NONE-s and such
   // also does not do anything interesting to linked spans; puts them together under one label
-  def getPredicateArgumentStructure(entry: NomBankEntry, refTree: SyntaxTree) = entry match {
-    case NomBankEntry(ptbSentencePath, headIndex, predLemma, framesetId, argSpanIndicators) =>
-      val words = refTree.words
-      val head = words(headIndex)
-      val predicate = Predicate(head, predLemma, framesetId)
-      val argumentSpans = argSpanIndicators.map {
-        case LinkedSpanIndicator(label, spanIndicators) =>
-          val words = refTree.foldUnlabeled(w => (List.empty[Word], SpanIndicator(w.index, 0), List(w))) { children =>
-            val oldWords = children.flatMap(_._1)
-            val newWords = children.filter(t => spanIndicators.contains(t._2)).flatMap(_._3)
-            val newIndicator = children.head._2.upOne
-            val allWords = children.flatMap(_._3)
-            (oldWords ++ newWords, newIndicator, allWords)
-          }._1
-          ArgumentSpan(label, words)
-      }
-      PredicateArgumentStructure(predicate, argumentSpans)
-  }
+  def getPredicateArgumentStructure(entry: NomBankEntry, refTree: SyntaxTree) =
+    entry match {
+      case NomBankEntry(ptbSentencePath, headIndex, predLemma, framesetId, argSpanIndicators) =>
+        val words = refTree.words
+        val head = words(headIndex)
+        val predicate = Predicate(head, predLemma, framesetId)
+        val argumentSpans = argSpanIndicators.map {
+          case LinkedSpanIndicator(label, spanIndicators) =>
+            val words = refTree
+              .foldUnlabeled(w => (List.empty[Word], SpanIndicator(w.index, 0), List(w))) {
+                children =>
+                  val oldWords = children.flatMap(_._1)
+                  val newWords = children
+                    .filter(t => spanIndicators.contains(t._2))
+                    .flatMap(_._3)
+                  val newIndicator = children.head._2.upOne
+                  val allWords = children.flatMap(_._3)
+                  (oldWords ++ newWords, newIndicator, allWords)
+              }
+              ._1
+            ArgumentSpan(label, words)
+        }
+        PredicateArgumentStructure(predicate, argumentSpans)
+    }
 
   def getPredicateArgumentStructureReindexed(entry: NomBankEntry, refTree: SyntaxTree) = {
     val pas = getPredicateArgumentStructure(entry, refTree)
     // reindex it
     case class IndexMappingState(curMapping: List[Option[Int]], nextIndex: Int) {
       def noToken = this.copy(curMapping = None :: this.curMapping)
-      def yesToken = IndexMappingState(Some(nextIndex) :: curMapping, nextIndex + 1)
+      def yesToken =
+        IndexMappingState(Some(nextIndex) :: curMapping, nextIndex + 1)
     }
-    val mapping = refTree.words.foldLeft(IndexMappingState(Nil, 0)) {
-      case (acc, word) =>
-        if(word.pos == "-NONE-") acc.noToken
-        else acc.yesToken
-    }.curMapping.reverse.toVector
-    def mapWord(w: Word): Option[Word] = mapping(w.index).map(i => w.copy(index = i))
+    val mapping = refTree.words
+      .foldLeft(IndexMappingState(Nil, 0)) {
+        case (acc, word) =>
+          if (word.pos == "-NONE-") acc.noToken
+          else acc.yesToken
+      }
+      .curMapping
+      .reverse
+      .toVector
+    def mapWord(w: Word): Option[Word] =
+      mapping(w.index).map(i => w.copy(index = i))
     val newHeadWord = mapWord(pas.pred.head).get // should always be present
     val newArgs = pas.arguments.flatMap { arg =>
-      arg.words.flatMap(mapWord).onlyIf(_.nonEmpty).map(ArgumentSpan(arg.label, _))
+      arg.words
+        .flatMap(mapWord)
+        .onlyIf(_.nonEmpty)
+        .map(ArgumentSpan(arg.label, _))
     }
     PredicateArgumentStructure(pas.pred.copy(head = newHeadWord), newArgs)
   }
@@ -76,15 +88,19 @@ package object nombank {
           val spanStrings = spansStr.split("[\\*;,]").toList
           val spans = spanStrings.map(
             _.split(":").toList match {
-              case IntMatch(leftIndex) :: IntMatch(height) :: Nil => SpanIndicator(leftIndex, height)
+              case IntMatch(leftIndex) :: IntMatch(height) :: Nil =>
+                SpanIndicator(leftIndex, height)
             }
           )
           LinkedSpanIndicator(label.tail, spans)
         }
         NomBankEntry(
           PTBSentencePath(PTBPath(pathSuffix.toUpperCase), sentenceNum),
-          headIndex, predLemma, framesetId,
-          arguments)
+          headIndex,
+          predLemma,
+          framesetId,
+          arguments
+        )
     }
   }
 }

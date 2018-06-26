@@ -20,7 +20,7 @@ package object propbank {
     import fastparse.all._
     private[this] val popWord: SpanState[Word] = for {
       words <- State.get
-      _ <- State.set(words.tail)
+      _     <- State.set(words.tail)
     } yield words.head
 
     private[this] val labelP: P[String] =
@@ -34,26 +34,29 @@ package object propbank {
 
     private[this] val spanP: P[SpanState[ArgumentSpan]] =
       P("(" ~ labelP ~ wordsP ~ ")").map {
-        case (label, wordsState) => for {
-          words <- wordsState
-        } yield ArgumentSpan(label, words)
+        case (label, wordsState) =>
+          for {
+            words <- wordsState
+          } yield ArgumentSpan(label, words)
       }
 
     private[this] val spanAndWordsP: P[SpanState[ArgumentSpan]] =
       P(wordsP ~ spanP).map {
-        case (wordsState, spanState) => for {
-          _ <- wordsState
-          span <- spanState
-        } yield span
+        case (wordsState, spanState) =>
+          for {
+            _    <- wordsState
+            span <- spanState
+          } yield span
       }
 
     private[this] val allSpansP: P[SpanState[List[ArgumentSpan]]] =
       P(spanAndWordsP.rep ~ wordsP).map {
-        case (spanStates, finalWords) => for {
-          spans <- spanStates.toList.sequence
-          // TODO return an informative error if finalWords aren't all used up by the end
-          _ <- finalWords
-        } yield spans
+        case (spanStates, finalWords) =>
+          for {
+            spans <- spanStates.toList.sequence
+            // TODO return an informative error if finalWords aren't all used up by the end
+            _ <- finalWords
+          } yield spans
       }
 
     def readArgumentSpans(s: String, words: List[Word]): List[ArgumentSpan] =
@@ -82,13 +85,17 @@ package object propbank {
     def readFile(path: PropBankPath, lines: Iterator[String]): PropBankFile = {
       val (sentences, _, _) = lines
         .foldLeft((List.empty[PropBankSentence], List.empty[String], 0)) {
-        case ((prevSentences, curLines, sentenceNum), line) =>
-          if(line.trim.isEmpty) {
-            (readSentence(PropBankSentencePath(path, sentenceNum), curLines.reverse) :: prevSentences, Nil, sentenceNum + 1)
-          } else {
-            (prevSentences, line :: curLines, sentenceNum)
-          }
-      }
+          case ((prevSentences, curLines, sentenceNum), line) =>
+            if (line.trim.isEmpty) {
+              (
+                readSentence(PropBankSentencePath(path, sentenceNum), curLines.reverse) :: prevSentences,
+                Nil,
+                sentenceNum + 1
+              )
+            } else {
+              (prevSentences, line :: curLines, sentenceNum)
+            }
+        }
       PropBankFile(path, sentences.toVector.reverse)
     }
   }

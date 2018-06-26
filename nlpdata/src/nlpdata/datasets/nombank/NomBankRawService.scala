@@ -9,7 +9,8 @@ import nlpdata.datasets.ptb._
 
 class NomBankRawService[M[_]](
   val nombank: collection.Map[PTBSentencePath, List[NomBankEntry]],
-  ptbService: PTBService[M])(
+  ptbService: PTBService[M]
+)(
   implicit override protected val monad: Monad[M]
 ) extends NomBankService[M] {
 

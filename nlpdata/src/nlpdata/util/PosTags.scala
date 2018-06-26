@@ -9,17 +9,34 @@ object PosTags {
   val verbPosTags = Set("VB", "VBD", "VBG", "VBN", "VBP", "VBZ")
   val whPosTags = Set("WDT", "WP", "WP$", "WRB")
   val adjectivePosTags = Set("JJ", "JJR", "JJS")
+
   val symbolPosTags = Set(
-    ".", "$",
-    "-LRB-", "-LCB-", "-LSB-",
-    "-RRB-", "-RCB-", "-RSB-"
+    ".",
+    "$",
+    "-LRB-",
+    "-LCB-",
+    "-LSB-",
+    "-RRB-",
+    "-RCB-",
+    "-RSB-"
   ) // there may be others.
 
   val allPosTags = Set(
-    "CC", "CD", "DT", "EX", "FW", "IN", // then adjectives
+    "CC",
+    "CD",
+    "DT",
+    "EX",
+    "FW",
+    "IN", // then adjectives
     "LS",
     "MD", // then nouns
-    "PDT", "POS", "PRP", "PRP$", // then adverbs
-    "RP", "SYM", "TO", "UH" // then verbs, then whs
+    "PDT",
+    "POS",
+    "PRP",
+    "PRP$", // then adverbs
+    "RP",
+    "SYM",
+    "TO",
+    "UH" // then verbs, then whs
   ) ++ adjectivePosTags ++ nounPosTags ++ adverbPosTags ++ verbPosTags ++ whPosTags ++ symbolPosTags
 }

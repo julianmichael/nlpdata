@@ -6,8 +6,8 @@ import cats.implicits._
 
 import nlpdata.util._
 
-import scala.util.{Try, Success, Failure}
-import java.nio.file.{Paths, Path, Files}
+import scala.util.{Failure, Success, Try}
+import java.nio.file.{Files, Path, Paths}
 
 class CoNLLFileSystemService(location: Path) extends CoNLLService[Try] {
 
@@ -15,12 +15,16 @@ class CoNLLFileSystemService(location: Path) extends CoNLLService[Try] {
 
   import com.softwaremill.macmemo.memoize
   import com.softwaremill.macmemo.MemoCacheBuilder
-  private[this] implicit val cacheProvider = MemoCacheBuilder.guavaMemoCacheBuilder
+  private[this] implicit val cacheProvider =
+    MemoCacheBuilder.guavaMemoCacheBuilder
   import scala.concurrent.duration._
 
   @memoize(maxSize = 200, expiresAfter = 1.hour)
   private[this] def getFileUnsafe(path: CoNLLPath): CoNLLFile = {
-    loadFile(location.resolve(path.suffix)).map(lines => CoNLLParsing.readFile(path, lines)).tried.get
+    loadFile(location.resolve(path.suffix))
+      .map(lines => CoNLLParsing.readFile(path, lines))
+      .tried
+      .get
   }
 
   def getFile(path: CoNLLPath): Try[CoNLLFile] =
@@ -28,8 +32,10 @@ class CoNLLFileSystemService(location: Path) extends CoNLLService[Try] {
 
   def getAllPaths: Try[List[CoNLLPath]] = Try {
     def listFilePathsInRecursiveSubdirectories(rootPath: Path, file: java.io.File): List[String] =
-      if(!file.isDirectory) List(rootPath.resolve(file.getName).toString)
-      else file.listFiles.toList.flatMap(listFilePathsInRecursiveSubdirectories(rootPath.resolve(file.getName), _))
+      if (!file.isDirectory) List(rootPath.resolve(file.getName).toString)
+      else
+        file.listFiles.toList
+          .flatMap(listFilePathsInRecursiveSubdirectories(rootPath.resolve(file.getName), _))
     new java.io.File(location.toString).listFiles.toList
       .flatMap(listFilePathsInRecursiveSubdirectories(Paths.get(""), _))
       .flatMap(CoNLLPath.fromPathSuffix)

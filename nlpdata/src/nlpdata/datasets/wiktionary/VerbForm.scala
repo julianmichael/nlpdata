@@ -8,8 +8,7 @@ case object Past extends VerbForm
 case object PastParticiple extends VerbForm
 
 object VerbForm {
-  def allForms: List[VerbForm] = List(
-    Stem,
-    PresentSingular3rd, PresentParticiple,
-    Past, PastParticiple)
+
+  def allForms: List[VerbForm] =
+    List(Stem, PresentSingular3rd, PresentParticiple, Past, PastParticiple)
 }

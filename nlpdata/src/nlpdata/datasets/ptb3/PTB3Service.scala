@@ -24,10 +24,11 @@ trait PTB3Service[M[_]] {
 
   def getAllPaths: M[List[PTB3Path]]
 
-  def getAllSentencePaths: M[List[PTB3SentencePath]] = for {
-    paths <- getAllPaths
-    files <- paths.map(getFile).sequence
-  } yield files.flatMap(file => file.sentences.map(_.path))
+  def getAllSentencePaths: M[List[PTB3SentencePath]] =
+    for {
+      paths <- getAllPaths
+      files <- paths.map(getFile).sequence
+    } yield files.flatMap(file => file.sentences.map(_.path))
 
   def getSentence(path: PTB3SentencePath): M[PTB3Sentence] =
     getFile(path.filepath).map(_.sentences(path.sentenceNum))
@@ -35,7 +36,7 @@ trait PTB3Service[M[_]] {
   // maybe for ease of migration
 
   def getParseTree(path: PTB3SentencePath): M[SyntaxTree] =
-   getSentence(path).map(_.syntaxTree)
+    getSentence(path).map(_.syntaxTree)
 }
 
 sealed trait PTB3ServiceRequestA[A]
@@ -56,9 +57,7 @@ object FreePTB3Service extends PTB3Service[Free[PTB3ServiceRequestA, ?]] {
     Free.liftF[PTB3ServiceRequestA, List[PTB3Path]](GetAllPaths)
 }
 
-
-class InterpretedPTB3Service[M[_]](
-  interpreter: PTB3ServiceRequestA ~> M)(
+class InterpretedPTB3Service[M[_]](interpreter: PTB3ServiceRequestA ~> M)(
   protected override implicit val monad: Monad[M]
 ) extends PTB3Service[M] {
 

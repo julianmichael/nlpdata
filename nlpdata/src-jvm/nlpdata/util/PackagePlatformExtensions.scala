@@ -5,7 +5,7 @@ import resource.ManagedResource
 
 import scala.util.Try
 
-import java.nio.file.{Paths, Path, Files}
+import java.nio.file.{Files, Path, Paths}
 
 trait PackagePlatformExtensions {
   protected[nlpdata] def loadFile(path: Path): ManagedResource[Iterator[String]] = {

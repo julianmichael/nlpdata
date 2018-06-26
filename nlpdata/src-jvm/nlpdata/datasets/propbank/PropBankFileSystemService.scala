@@ -1,4 +1,5 @@
 package nlpdata.datasets
+
 package propbank
 
 import nlpdata.util._
@@ -8,7 +9,7 @@ import cats.implicits._
 
 import scala.util.Try
 
-import java.nio.file.{Paths, Path, Files}
+import java.nio.file.{Files, Path, Paths}
 
 class PropBankFileSystemService(location: Path) extends PropBankService[Try] {
   implicit override protected val monad: Monad[Try] = implicitly[Monad[Try]]

@@ -7,10 +7,7 @@ import nlpdata.util.HasTokens
 
 case class PTBFile(sentences: Vector[PTBSentence])
 
-case class PTBSentence(
-  sentenceNum: Int,
-  words: Vector[Word],
-  syntaxTree: SyntaxTree)
+case class PTBSentence(sentenceNum: Int, words: Vector[Word], syntaxTree: SyntaxTree)
 
 object PTBSentence {
   implicit object PTBSentenceHasTokens extends HasTokens[PTBSentence] {

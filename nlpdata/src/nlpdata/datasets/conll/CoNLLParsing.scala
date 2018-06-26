@@ -15,16 +15,17 @@ object CoNLLParsing {
   import fastparse.all._
   private[this] val symbolP: P[String] = P(CharIn('A' to 'Z').rep.!)
   private[this] lazy val treeP: P[SentenceState[SyntaxTree]] =
-    P("(" ~ symbolP ~ treeP.rep ~ ")").map {
-      case (symbol, childrenState) => for {
+  P("(" ~ symbolP ~ treeP.rep ~ ")").map {
+    case (symbol, childrenState) =>
+      for {
         children <- childrenState.toList.sequence
       } yield SyntaxTreeNode(symbol, children.toList): SyntaxTree
-    } | P("*").map { _ =>
-      for {
-        words <- State.get
-        _ <- State.set(words.tail)
-      } yield SyntaxTreeLeaf(words.head)
-    }
+  } | P("*").map { _ =>
+    for {
+      words <- State.get
+      _     <- State.set(words.tail)
+    } yield SyntaxTreeLeaf(words.head)
+  }
 
   /** Parses a SyntaxTree from its flattened column representation in the CoNLL data.
     *
@@ -47,7 +48,11 @@ object CoNLLParsing {
     * @param lines the lines of the file containing the sentence's info
     * @return the CoNLL sentence stored in the data
     */
-  def readSentence(path: CoNLLPath, sentenceNum: Int, lines: NonEmptyList[String]): CoNLLSentence = {
+  def readSentence(
+    path: CoNLLPath,
+    sentenceNum: Int,
+    lines: NonEmptyList[String]
+  ): CoNLLSentence = {
     val lineArrays = lines.map(_.split("\\s+"))
     val partNum = lineArrays.head(1).toInt
     val words = lineArrays.map(arr => Word(arr(2).toInt, arr(4), arr(3))).toList
@@ -70,7 +75,8 @@ object CoNLLParsing {
     CoNLLSentence(sentencePath, partNum, words, tree, paStructures)
   }
 
-  private[this] val firstLineRegex = """#begin document \((.*)\); part ([0-9]+)""".r
+  private[this] val firstLineRegex =
+    """#begin document \((.*)\); part ([0-9]+)""".r
   private[this] val endDocumentLine = "#end document"
 
   /** Reads a CoNLLFile from an iterator over lines.
@@ -82,16 +88,21 @@ object CoNLLParsing {
     * @param lines the lines of a CoNLL file
     */
   def readFile(path: CoNLLPath, lines: Iterator[String]): CoNLLFile = {
-    val (sentences, _, _) = lines.foldLeft((List.empty[CoNLLSentence], List.empty[String], 0)) {
-      case (acc @ (prevSentences, curLines, sentenceNum), line) =>
-        if(line.trim.isEmpty) NonEmptyList.fromList(curLines).fold(acc) { neCurLines =>
-          (readSentence(path, sentenceNum, neCurLines.reverse) :: prevSentences, Nil, sentenceNum + 1)
-        } else if(firstLineRegex.findFirstIn(line).nonEmpty || line.equals(endDocumentLine)) {
-          acc
-        } else {
-          (prevSentences, line :: curLines, sentenceNum)
-        }
-    }
+    val (sentences, _, _) =
+      lines.foldLeft((List.empty[CoNLLSentence], List.empty[String], 0)) {
+        case (acc @ (prevSentences, curLines, sentenceNum), line) =>
+          if (line.trim.isEmpty) NonEmptyList.fromList(curLines).fold(acc) { neCurLines =>
+            (
+              readSentence(path, sentenceNum, neCurLines.reverse) :: prevSentences,
+              Nil,
+              sentenceNum + 1
+            )
+          } else if (firstLineRegex.findFirstIn(line).nonEmpty || line.equals(endDocumentLine)) {
+            acc
+          } else {
+            (prevSentences, line :: curLines, sentenceNum)
+          }
+      }
     CoNLLFile(path, sentences.toVector.reverse)
   }
 }

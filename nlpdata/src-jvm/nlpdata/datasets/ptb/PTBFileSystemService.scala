@@ -8,15 +8,17 @@ import nlpdata.util._
 import scala.util.Try
 import scala.language.implicitConversions
 
-import java.nio.file.{Paths, Path, Files}
+import java.nio.file.{Files, Path, Paths}
 
 class PTBFileSystemService(location: Path) extends PTBService[Try] {
   implicit override protected val monad: Monad[Try] = implicitly[Monad[Try]]
-  private[this] val wsjAnnotationPath = location.resolve(Paths.get("COMBINED/WSJ"))
+  private[this] val wsjAnnotationPath =
+    location.resolve(Paths.get("COMBINED/WSJ"))
 
   import com.softwaremill.macmemo.memoize
   import com.softwaremill.macmemo.MemoCacheBuilder
-  private[this] implicit val cacheProvider = MemoCacheBuilder.guavaMemoCacheBuilder
+  private[this] implicit val cacheProvider =
+    MemoCacheBuilder.guavaMemoCacheBuilder
   import scala.concurrent.duration._
   import scala.language.postfixOps
 
@@ -31,7 +33,9 @@ class PTBFileSystemService(location: Path) extends PTBService[Try] {
 
   def allPTBPaths = Try {
     val pathsIter = for {
-      sectionName <- new java.io.File(wsjAnnotationPath.toString).listFiles.map(_.getName).iterator
+      sectionName <- new java.io.File(wsjAnnotationPath.toString).listFiles
+        .map(_.getName)
+        .iterator
       sectionFolder = new java.io.File(wsjAnnotationPath.resolve(sectionName).toString)
       if sectionFolder.isDirectory
       fileName <- sectionFolder.listFiles.map(_.getName).iterator

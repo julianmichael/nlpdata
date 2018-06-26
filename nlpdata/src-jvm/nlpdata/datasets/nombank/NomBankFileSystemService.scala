@@ -9,7 +9,7 @@ import scala.util.Try
 import cats._
 import cats.implicits._
 
-import java.nio.file.{Paths, Path, Files}
+import java.nio.file.{Files, Path, Paths}
 
 class NomBankFileSystemService(
   location: Path,
@@ -23,7 +23,8 @@ class NomBankFileSystemService(
   // this is stupid and due to the lack of a proper builder for immutable.Map
   lazy val getNomBankUnsafe: collection.Map[PTBSentencePath, List[NomBankEntry]] = {
     val fileResource = loadFile(nomBankAnnotationPath).map { lines =>
-      val map = collection.mutable.Map.empty[PTBSentencePath, List[NomBankEntry]]
+      val map =
+        collection.mutable.Map.empty[PTBSentencePath, List[NomBankEntry]]
       lines.foreach { line =>
         val entry = Parsing.readEntry(line)
         val curEntries = map.get(entry.ptbSentencePath).getOrElse(Nil)
@@ -37,7 +38,8 @@ class NomBankFileSystemService(
   def getNomBank: Try[collection.Map[PTBSentencePath, List[NomBankEntry]]] =
     Try(getNomBankUnsafe)
 
-  def getRawService: Try[NomBankRawService[Try]] = getNomBank.map(new NomBankRawService(_, ptbService))
+  def getRawService: Try[NomBankRawService[Try]] =
+    getNomBank.map(new NomBankRawService(_, ptbService))
 
   override def getPredArgStructures(
     path: PTBSentencePath

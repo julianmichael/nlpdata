@@ -12,41 +12,53 @@ case class InflectedForms(
 ) extends (VerbForm => LowerCaseString) {
 
   def apply(form: VerbForm): LowerCaseString = form match {
-    case Stem => stem
+    case Stem               => stem
     case PresentSingular3rd => present
-    case PresentParticiple => presentParticiple
-    case Past => past
-    case PastParticiple => pastParticiple
+    case PresentParticiple  => presentParticiple
+    case Past               => past
+    case PastParticiple     => pastParticiple
   }
 
   def getForm(verb: LowerCaseString): Option[VerbForm] =
-    if(verb == stem) Some(Stem)
-    else if(verb == present) Some(PresentSingular3rd)
-    else if(verb == presentParticiple) Some(PresentParticiple)
-    else if(verb == past) Some(Past)
-    else if(verb == pastParticiple) Some(PastParticiple)
+    if (verb == stem) Some(Stem)
+    else if (verb == present) Some(PresentSingular3rd)
+    else if (verb == presentParticiple) Some(PresentParticiple)
+    else if (verb == past) Some(Past)
+    else if (verb == pastParticiple) Some(PastParticiple)
     else None
 
-  def allForms: List[LowerCaseString] = List(stem, present, presentParticiple, past, pastParticiple)
+  def allForms: List[LowerCaseString] =
+    List(stem, present, presentParticiple, past, pastParticiple)
 }
 
 object InflectedForms {
-  def fromStrings(stem: String, present: String, presentParticiple: String, past: String, pastParticiple: String) =
+
+  def fromStrings(
+    stem: String,
+    present: String,
+    presentParticiple: String,
+    past: String,
+    pastParticiple: String
+  ) =
     InflectedForms(
       stem.lowerCase,
       present.lowerCase,
       presentParticiple.lowerCase,
       past.lowerCase,
-      pastParticiple.lowerCase)
+      pastParticiple.lowerCase
+    )
 
-  val doForms = InflectedForms.fromStrings(
-    "do", "does", "doing", "did", "done")
+  val doForms = InflectedForms.fromStrings("do", "does", "doing", "did", "done")
 
-  val beSingularForms = InflectedForms.fromStrings(
-    "be", "is", "being", "was", "been")
+  val beSingularForms =
+    InflectedForms.fromStrings("be", "is", "being", "was", "been")
 
   val haveForms = InflectedForms.fromStrings(
-    "have", "has", "having", "had", "had"
+    "have",
+    "has",
+    "having",
+    "had",
+    "had"
   )
 
 }

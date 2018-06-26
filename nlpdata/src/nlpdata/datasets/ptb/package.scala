@@ -16,20 +16,22 @@ package object ptb {
     private[this] type SentenceState[A] = State[Int, A]
 
     import fastparse.all._
-    private[this] val symbolP: P[String] = P(CharPred(c =>  !" ()".contains(c)).rep.!)
+    private[this] val symbolP: P[String] = P(CharPred(c => !" ()".contains(c)).rep.!)
     // P(CharIn('A' to 'Z', '0' to '9', "-$,.").rep.!)
-    private[this] val tokenP: P[String] = P(CharPred(c =>  !" ()".contains(c)).rep.!)
+    private[this] val tokenP: P[String] = P(CharPred(c => !" ()".contains(c)).rep.!)
     private[this] lazy val treeP: P[SentenceState[SyntaxTree]] =
-      P("(" ~ symbolP ~ " " ~ treeP.rep ~ ")").map {
-        case (symbol, childrenState) => for {
+    P("(" ~ symbolP ~ " " ~ treeP.rep ~ ")").map {
+      case (symbol, childrenState) =>
+        for {
           children <- childrenState.toList.sequence
         } yield SyntaxTreeNode(symbol, children.toList): SyntaxTree
-      } | P("(" ~ symbolP ~ " " ~ tokenP ~ ")" ~ " ".?).map {
-        case (pos, token) => for {
+    } | P("(" ~ symbolP ~ " " ~ tokenP ~ ")" ~ " ".?).map {
+      case (pos, token) =>
+        for {
           index <- State.get
-          _ <- State.set(index + 1)
+          _     <- State.set(index + 1)
         } yield SyntaxTreeLeaf(Word(index, pos, token)): SyntaxTree
-      }
+    }
     private[this] val fullTreeP: P[SyntaxTree] =
       P("(" ~ " ".? ~ treeP ~ ")").map(_.runA(0).value)
 
@@ -43,7 +45,6 @@ package object ptb {
     def readSyntaxTree(s: String): SyntaxTree =
       fullTreeP.parse(s).get.value
 
-
     /** Reads a PTBFile from an iterator over lines.
       *
       * Assumes that the given lines are taken directly from a PTB file.
@@ -54,17 +55,17 @@ package object ptb {
     def readFile(lines: Iterator[String]): PTBFile = {
       val (sentences, lastChunk, lastIndex) = lines
         .foldLeft((List.empty[PTBSentence], List.empty[String], 0)) {
-        case ((prevSentences, curLines, sentenceNum), line) =>
-          if(line.isEmpty) {
-            (prevSentences, curLines, sentenceNum)
-          } else if(!line.startsWith(" ") && !curLines.isEmpty) {
-            val tree = readSyntaxTree(curLines.reverse.map(_.dropWhile(_ == ' ')).mkString)
-            val sentence = PTBSentence(sentenceNum, tree.words, tree)
-            (sentence :: prevSentences, line :: Nil, sentenceNum + 1)
-          } else {
-            (prevSentences, line :: curLines, sentenceNum)
-          }
-      }
+          case ((prevSentences, curLines, sentenceNum), line) =>
+            if (line.isEmpty) {
+              (prevSentences, curLines, sentenceNum)
+            } else if (!line.startsWith(" ") && !curLines.isEmpty) {
+              val tree = readSyntaxTree(curLines.reverse.map(_.dropWhile(_ == ' ')).mkString)
+              val sentence = PTBSentence(sentenceNum, tree.words, tree)
+              (sentence :: prevSentences, line :: Nil, sentenceNum + 1)
+            } else {
+              (prevSentences, line :: curLines, sentenceNum)
+            }
+        }
       val lastSentence = {
         val tree = readSyntaxTree(lastChunk.reverse.map(_.dropWhile(_ == ' ')).mkString)
         PTBSentence(lastIndex, tree.words, tree)

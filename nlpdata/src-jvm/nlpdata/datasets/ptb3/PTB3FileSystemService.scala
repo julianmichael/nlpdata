@@ -9,20 +9,22 @@ import nlpdata.util._
 import scala.util.Try
 import scala.language.implicitConversions
 
-import java.nio.file.{Paths, Path, Files}
+import java.nio.file.{Files, Path, Paths}
 
 class PTB3FileSystemInterpreter(location: Path) extends (PTB3ServiceRequestA ~> Try) {
 
   def apply[A](request: PTB3ServiceRequestA[A]): Try[A] = request match {
     case GetFile(path) => getFile(path)
-    case GetAllPaths => allPTBPaths
+    case GetAllPaths   => allPTBPaths
   }
 
-  private[this] val annotationPath = location.resolve(Paths.get("TREEBANK_3/PARSED/MRG"))
+  private[this] val annotationPath =
+    location.resolve(Paths.get("TREEBANK_3/PARSED/MRG"))
 
   import com.softwaremill.macmemo.memoize
   import com.softwaremill.macmemo.MemoCacheBuilder
-  private[this] implicit val cacheProvider = MemoCacheBuilder.guavaMemoCacheBuilder
+  private[this] implicit val cacheProvider =
+    MemoCacheBuilder.guavaMemoCacheBuilder
   import scala.concurrent.duration._
   import scala.language.postfixOps
 
@@ -38,16 +40,19 @@ class PTB3FileSystemInterpreter(location: Path) extends (PTB3ServiceRequestA ~> 
     fileResource.tried.get
   }
 
-  private[this] def getFile(path: PTB3Path): Try[PTB3File] = Try(getFileUnsafe(path))
+  private[this] def getFile(path: PTB3Path): Try[PTB3File] =
+    Try(getFileUnsafe(path))
 
   private[this] def allPTBPaths = Try {
     val wsjPrefix = annotationPath.resolve("WSJ")
     val wsjPaths = for {
-      sectionName <- new java.io.File(wsjPrefix.toString).listFiles.map(_.getName).iterator
+      sectionName <- new java.io.File(wsjPrefix.toString).listFiles
+        .map(_.getName)
+        .iterator
       sectionFolder = new java.io.File(wsjPrefix.resolve(sectionName).toString)
       if sectionFolder.isDirectory
       sectionNumber <- Try(sectionName.toInt).toOption.iterator
-      fileName <- sectionFolder.listFiles.map(_.getName).iterator
+      fileName      <- sectionFolder.listFiles.map(_.getName).iterator
       if fileName.endsWith(".MRG")
       // filename format: WSJ_SSNN.MRG
       // where SS is section number and NN is file number
@@ -57,7 +62,9 @@ class PTB3FileSystemInterpreter(location: Path) extends (PTB3ServiceRequestA ~> 
 
     val brownPrefix = annotationPath.resolve("BROWN")
     val brownPaths = for {
-      domain <- new java.io.File(brownPrefix.toString).listFiles.map(_.getName).iterator
+      domain <- new java.io.File(brownPrefix.toString).listFiles
+        .map(_.getName)
+        .iterator
       domainFolder = new java.io.File(brownPrefix.resolve(domain).toString)
       if domainFolder.isDirectory
       fileName <- domainFolder.listFiles.map(_.getName).iterator
@@ -75,5 +82,5 @@ class PTB3FileSystemInterpreter(location: Path) extends (PTB3ServiceRequestA ~> 
 class PTB3FileSystemService(
   location: Path
 ) extends InterpretedPTB3Service[Try](
-  new PTB3FileSystemInterpreter(location)
-)
+      new PTB3FileSystemInterpreter(location)
+    )

@@ -9,5 +9,6 @@ trait Wiki1kService[M[_]] {
   def getFile(path: Wiki1kPath): M[Wiki1kFile]
 
   def getSentence(path: Wiki1kSentencePath): M[Wiki1kSentence] =
-    getFile(path.filePath).map(_.paragraphs(path.paragraphNum)(path.sentenceNum))
+    getFile(path.filePath)
+      .map(_.paragraphs(path.paragraphNum)(path.sentenceNum))
 }

@@ -1,6 +1,6 @@
 package nlpdata
 
-import scala.util.{Try, Success, Failure}
+import scala.util.{Failure, Success, Try}
 import scala.collection.mutable
 import scala.collection.TraversableOnce
 
@@ -13,6 +13,7 @@ import scala.language.implicitConversions
   * and some random stuff (the latter three on this object).
   */
 package object util extends PackagePlatformExtensions {
+
   def simpleTokenize(s: String): Vector[String] =
     s.split("(\\s+|[.,;!?.'\"])").toVector
 
@@ -25,9 +26,10 @@ package object util extends PackagePlatformExtensions {
 
   protected[nlpdata] object IntMatch {
     val IntMatchRegex = "(\\d+)".r
+
     def unapply(s: String): Option[Int] = s match {
       case IntMatchRegex(num) => Some(num.toInt)
-      case _ => None
+      case _                  => None
     }
   }
 
@@ -42,14 +44,19 @@ package object util extends PackagePlatformExtensions {
   protected[nlpdata] implicit class RichValForOptions[A](val a: A) extends AnyVal {
     def onlyIf(p: (A => Boolean)): Option[A] = Some(a).filter(p)
     def ifNot(p: (A => Boolean)): Option[A] = Some(a).filterNot(p)
-    def wrapNullable: Option[A] = if(a == null) None else Some(a) // TODO probably Option(A) works here
+
+    def wrapNullable: Option[A] =
+      if (a == null) None else Some(a) // TODO probably Option(A) works here
   }
 
   protected[nlpdata] implicit class RichValForLists[A](val a: A) extends AnyVal {
+
     def unfoldList[B](f: A => Option[(B, A)]): List[B] = f(a) match {
-      case None => Nil
+      case None                   => Nil
       case Some((head, tailToGo)) => head :: tailToGo.unfoldList(f)
     }
-    def unfoldList[B](f: PartialFunction[A, (B, A)]): List[B] = a.unfoldList(f.lift)
+
+    def unfoldList[B](f: PartialFunction[A, (B, A)]): List[B] =
+      a.unfoldList(f.lift)
   }
 }

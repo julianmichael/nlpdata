@@ -14,8 +14,7 @@ import nlpdata.util.LowerCaseStrings._
   *
   * @param inflDict the backing inflection dictionary
   */
-class Inflections(
-  private[this] val inflDict: VerbInflectionDictionary) {
+class Inflections(private[this] val inflDict: VerbInflectionDictionary) {
 
   import Inflections._
 
@@ -32,18 +31,19 @@ class Inflections(
   def getInflectedForms(verb: LowerCaseString): Option[InflectedForms] = {
     val (verbPrefixOpt, verbSuffix) = verb.indexOf("-") match {
       case -1 => (None, verb)
-      case i => (Some(verb.substring(0, i)), verb.substring(i + 1))
+      case i  => (Some(verb.substring(0, i)), verb.substring(i + 1))
     }
     Option(inflDict.getBestInflections(verbSuffix)).map { l =>
-      val forms = verbPrefixOpt.fold(l.map(_.lowerCase))(prefix =>
-        l.map(suffix => s"$prefix-$suffix".lowerCase)
+      val forms = verbPrefixOpt.fold(l.map(_.lowerCase))(
+        prefix => l.map(suffix => s"$prefix-$suffix".lowerCase)
       )
       InflectedForms(
         stem = forms(0),
         present = forms(1),
         presentParticiple = forms(2),
         past = forms(3),
-        pastParticiple = forms(4))
+        pastParticiple = forms(4)
+      )
     }
   }
 
@@ -58,18 +58,23 @@ class Inflections(
     * @return all possible forms of the verb
     */
   def getAllForms(word: LowerCaseString): Set[LowerCaseString] = {
-    val extras: Set[LowerCaseString] = extraForms.get(getUninflected(word).getOrElse(word)).getOrElse(Set.empty[LowerCaseString])
-    List(doVerbs, beVerbs, willVerbs, haveVerbs, wouldVerbs, negationWords).filter(_.contains(word)).headOption
+    val extras: Set[LowerCaseString] = extraForms
+      .get(getUninflected(word).getOrElse(word))
+      .getOrElse(Set.empty[LowerCaseString])
+    List(doVerbs, beVerbs, willVerbs, haveVerbs, wouldVerbs, negationWords)
+      .filter(_.contains(word))
+      .headOption
       .orElse(getInflectedForms(word).map(_.allForms.toSet))
       .getOrElse(Set(word)) ++ extras
   }
 
   /** Whether a word is present in the dictionary, auxiliary verbs not included. */
-  def hasInflectedForms(word: LowerCaseString) = !getInflectedForms(word).isEmpty
+  def hasInflectedForms(word: LowerCaseString) =
+    !getInflectedForms(word).isEmpty
 
   /** The stem of a verb, including "be". */
   def getUninflected(word: LowerCaseString): Option[LowerCaseString] = {
-    if(isCopulaVerb(word)) {
+    if (isCopulaVerb(word)) {
       return Some("be".lowerCase);
     } else {
       Option(inflDict.getBestInflections(word))
@@ -78,7 +83,8 @@ class Inflections(
   }
 
   /** Whether a word is a known verb stem. */
-  def isUninflected(word: LowerCaseString): Boolean = getUninflected(word).exists(_ == word)
+  def isUninflected(word: LowerCaseString): Boolean =
+    getUninflected(word).exists(_ == word)
 
   /** Whether a word is a known modal verb. */
   def isModal(word: LowerCaseString) = modalVerbs.contains(word)
@@ -87,39 +93,35 @@ class Inflections(
   def isCopulaVerb(word: LowerCaseString) = beVerbs.contains(word)
 
   /** Normalizes a modal (i.e., undoes its contraction form), otherwise identity. */
-  def getNormalizedModal(verb: LowerCaseString) = if(verb.equalsIgnoreCase("ca")) "can" else verb
+  def getNormalizedModal(verb: LowerCaseString) =
+    if (verb.equalsIgnoreCase("ca")) "can" else verb
 
   // TODO: add tense and stuff. not necessary right now.
   // See VerbHelper from the HITL project in EasySRL for more.
 }
+
 object Inflections {
-  final val doVerbs = Set(
-    "do", "does", "doing", "did", "done").map(_.lowerCase)
-  final val beVerbs = Set(
-    "be", "being", "been",
-    "am", "'m",
-    "is", "'s", "ai",
-    "are", "'re",
-    "was", "were").map(_.lowerCase)
-  val willVerbs = Set(
-    "will", "'ll", "wo").map(_.lowerCase)
-  val haveVerbs = Set(
-    "have", "having", "'ve", "has", "had", "'d").map(_.lowerCase)
-  val wouldVerbs = Set(
-    "would", "'d").map(_.lowerCase)
-  val modalVerbs = Set(
-    "can", "ca",
-    "could",
-    "may", "might", "must",
-    "shall", "should", "ought").map(_.lowerCase) ++ wouldVerbs
+  final val doVerbs = Set("do", "does", "doing", "did", "done").map(_.lowerCase)
+  final val beVerbs =
+    Set("be", "being", "been", "am", "'m", "is", "'s", "ai", "are", "'re", "was", "were").map(
+      _.lowerCase
+    )
+  val willVerbs = Set("will", "'ll", "wo").map(_.lowerCase)
+
+  val haveVerbs =
+    Set("have", "having", "'ve", "has", "had", "'d").map(_.lowerCase)
+  val wouldVerbs = Set("would", "'d").map(_.lowerCase)
+
+  val modalVerbs = Set("can", "ca", "could", "may", "might", "must", "shall", "should", "ought")
+    .map(_.lowerCase) ++ wouldVerbs
+
   val auxiliaryVerbs =
-    doVerbs ++ beVerbs ++ willVerbs ++ haveVerbs ++ modalVerbs
-  val negationWords = Set(
-    "no", "not", "n't").map(_.lowerCase)
+  doVerbs ++ beVerbs ++ willVerbs ++ haveVerbs ++ modalVerbs
+  val negationWords = Set("no", "not", "n't").map(_.lowerCase)
 
   /** Maps an uninflected verb to extra forms of it that aren't in wiktionary. */
   val extraForms = Map[LowerCaseString, Set[LowerCaseString]](
     "dream".lowerCase -> Set("dreamt").map(_.lowerCase),
-    "leap".lowerCase -> Set("leapt").map(_.lowerCase)
+    "leap".lowerCase  -> Set("leapt").map(_.lowerCase)
   )
 }

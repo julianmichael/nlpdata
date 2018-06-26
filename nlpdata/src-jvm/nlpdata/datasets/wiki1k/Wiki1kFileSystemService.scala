@@ -3,10 +3,10 @@ package nlpdata.datasets.wiki1k
 import cats.Monad
 import cats.implicits._
 
-import java.nio.file.{Paths, Path, Files}
+import java.nio.file.{Files, Path, Paths}
 import java.io.{BufferedReader, StringReader}
 
-import scala.util.{Try, Success, Failure}
+import scala.util.{Failure, Success, Try}
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -63,9 +63,14 @@ class Wiki1kFileSystemService(
     val sourceFilePath = location.resolve("Wiki1000/wiki1000.txt")
 
     import scala.collection.JavaConverters._
-    Files.lines(sourceFilePath).iterator.asScala.collect {
-      case pageBeginRegex(id, url, title) => id
-    }.toList
+    Files
+      .lines(sourceFilePath)
+      .iterator
+      .asScala
+      .collect {
+        case pageBeginRegex(id, url, title) => id
+      }
+      .toList
   }
 
   def wikinewsIds = {
@@ -73,9 +78,17 @@ class Wiki1kFileSystemService(
     val sourceFilePath = location.resolve("wikinews.txt")
 
     import scala.collection.JavaConverters._
-    Files.lines(sourceFilePath).iterator.asScala.collect {
-      case pageBeginRegex(id, url, title) => id
-    }.toVector.sortBy(-_.toInt).drop(500).toList
+    Files
+      .lines(sourceFilePath)
+      .iterator
+      .asScala
+      .collect {
+        case pageBeginRegex(id, url, title) => id
+      }
+      .toVector
+      .sortBy(-_.toInt)
+      .drop(500)
+      .toList
   }
 
   // domain: "wikipedia" or "wikinews" --- it is used for the API URL too!
@@ -93,35 +106,53 @@ class Wiki1kFileSystemService(
       s"https://en.$domain.org/w/api.php?action=query&prop=extracts%7Crevisions&format=json&explaintext=true&exsectionformat=plain&pageids=$urlPageId"
     }
 
-    def jsonForPageId(pageId: String) = Parse.parse(
-      io.Source.fromURL(urlForPageId(pageId)).mkString
-    ).right.get
+    def jsonForPageId(pageId: String) =
+      Parse
+        .parse(
+          io.Source.fromURL(urlForPageId(pageId)).mkString
+        )
+        .right
+        .get
 
     // kind of superfluous, oh well
-    def idForJson(json: Json) = json
-      .fieldOrNull("query").fieldOrNull("pages")
-      .objectFields.get.head
+    def idForJson(json: Json) =
+      json
+        .fieldOrNull("query")
+        .fieldOrNull("pages")
+        .objectFields
+        .get
+        .head
 
-    def revIdForJson(json: Json) = json
-      .fieldOrNull("query").fieldOrNull("pages")
-      .fieldOrNull(idForJson(json))
-      .fieldOrNull("revisions")
-      .array.get.head
-      .fieldOrNull("revid")
-    def titleForJson(json: Json) = json
-      .fieldOrNull("query").fieldOrNull("pages")
-      .fieldOrNull(idForJson(json))
-      .fieldOrNull("title")
-      .string.get
-    def contentForJson(json: Json) = json
-      .fieldOrNull("query").fieldOrNull("pages")
-      .fieldOrNull(idForJson(json))
-      .fieldOrNull("extract")
-      .string.get
+    def revIdForJson(json: Json) =
+      json
+        .fieldOrNull("query")
+        .fieldOrNull("pages")
+        .fieldOrNull(idForJson(json))
+        .fieldOrNull("revisions")
+        .array
+        .get
+        .head
+        .fieldOrNull("revid")
+    def titleForJson(json: Json) =
+      json
+        .fieldOrNull("query")
+        .fieldOrNull("pages")
+        .fieldOrNull(idForJson(json))
+        .fieldOrNull("title")
+        .string
+        .get
+    def contentForJson(json: Json) =
+      json
+        .fieldOrNull("query")
+        .fieldOrNull("pages")
+        .fieldOrNull(idForJson(json))
+        .fieldOrNull("extract")
+        .string
+        .get
 
     def writeFileFromPageId(pageId: String) = {
       val domainPath = location.resolve(domain)
-      if(!Files.exists(domainPath)) {
+      if (!Files.exists(domainPath)) {
         Files.createDirectories(domainPath)
       }
 
@@ -133,34 +164,38 @@ class Wiki1kFileSystemService(
       val fullParagraphs = content.split("\\n+")
       import scala.collection.JavaConverters._
       val paragraphs = fullParagraphs.iterator
-        .takeWhile(line => !Set("See also", "References", "Sources").contains(line.trim)
-      ).map { pLine =>
-        new DocumentPreprocessor(
-          new BufferedReader(new StringReader(pLine))
-        ).iterator.asScala.map { tokenListJava =>
-          tokenListJava.iterator.asScala.map(_.word).toVector: Vector[String]
-        }.toVector
-      }.filter(_.size > 1).toVector
+        .takeWhile(line => !Set("See also", "References", "Sources").contains(line.trim))
+        .map { pLine =>
+          new DocumentPreprocessor(
+            new BufferedReader(new StringReader(pLine))
+          ).iterator.asScala.map { tokenListJava =>
+            tokenListJava.iterator.asScala.map(_.word).toVector: Vector[String]
+          }.toVector
+        }
+        .filter(_.size > 1)
+        .toVector
       // ^^ remove paragraphs with 1 or fewer lines. gets rid of titles, lists, etc
       val fullPath = location.resolve(Wiki1kPath(domain, id).get)
-      val contentString = paragraphs.map(sentences =>
-        sentences.map(sentence =>
-          sentence.mkString(" ")
-        ).mkString("\n")
-      ).mkString("\n\n")
+      val contentString = paragraphs
+        .map(sentences => sentences.map(sentence => sentence.mkString(" ")).mkString("\n"))
+        .mkString("\n\n")
       val fileString = s"$id\n$revId\n$title\n$contentString"
-      if(Files.exists(fullPath)) {
+      if (Files.exists(fullPath)) {
         System.err.println(s"File already exists: $title ($id)")
       }
       Try(Files.write(fullPath, fileString.getBytes))
     }
 
-    pageIds.iterator.map { pageId =>
-      Thread.sleep(100)
-      Try(writeFileFromPageId(pageId)) match {
-        case Success(_) => true
-        case Failure(_) => println(s"Missing $domain page ID: $pageId"); false
+    pageIds.iterator
+      .map { pageId =>
+        Thread.sleep(100)
+        Try(writeFileFromPageId(pageId)) match {
+          case Success(_) => true
+          case Failure(_) => println(s"Missing $domain page ID: $pageId"); false
+        }
       }
-    }.filter(x => x).take(size).foreach(_ => ())
+      .filter(x => x)
+      .take(size)
+      .foreach(_ => ())
   }
 }
