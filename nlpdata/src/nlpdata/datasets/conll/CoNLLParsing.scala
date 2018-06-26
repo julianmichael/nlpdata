@@ -54,7 +54,7 @@ object CoNLLParsing {
     val treeString = lineArrays.map(arr => arr(5)).fold
     val tree = readSyntaxTree(treeString, words)
     val predicates = for {
-      (arr, index) <- lineArrays.zipWithIndex
+      (arr, index) <- lineArrays.zipWithIndex.toList
       predicateLemma = arr(6)
       if !predicateLemma.equals("-")
       framesetId = arr(7)
