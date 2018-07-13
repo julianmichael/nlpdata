@@ -4,7 +4,7 @@ import mill.util.Ctx
 import coursier.maven.MavenRepository
 import ammonite.ops._
 
-val thisPublishVersion = "0.1.1-SNAPSHOT"
+val thisPublishVersion = "0.2.0-SNAPSHOT"
 
 val scalaVersions = List("2.11.12", "2.12.6")
 val thisScalaJSVersion = "0.6.23"
@@ -12,7 +12,7 @@ val thisScalaJSVersion = "0.6.23"
 val kindProjectorVersion = "0.9.4"
 val macroParadiseVersion = "2.1.0"
 
-val catsVersion = "0.9.0"
+val catsVersion = "1.1.0"
 val upickleVersion = "0.4.4"
 val fastparseVersion = "0.4.4"
 val simulacrumVersion = "0.10.0"
@@ -32,6 +32,7 @@ trait CommonModule extends ScalaModule with ScalafmtModule {
   )
 
   def scalacOptions = Seq(
+    "-Ypartial-unification",
     "-language:higherKinds",
     "-unchecked",
     "-deprecation",
@@ -39,7 +40,8 @@ trait CommonModule extends ScalaModule with ScalafmtModule {
   )
 
   def ivyDeps = Agg(
-    ivy"org.typelevel::cats::$catsVersion",
+    ivy"org.typelevel::cats-core::$catsVersion",
+    ivy"org.typelevel::cats-free::$catsVersion",
     ivy"com.lihaoyi::fastparse::$fastparseVersion",
     ivy"com.github.mpilquist::simulacrum::$simulacrumVersion"
   )
