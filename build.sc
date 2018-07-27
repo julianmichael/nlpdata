@@ -4,7 +4,7 @@ import mill.util.Ctx
 import coursier.maven.MavenRepository
 import ammonite.ops._
 
-val thisPublishVersion = "0.2.0"
+val thisPublishVersion = "0.2.1-SNAPSHOT"
 
 val scalaVersions = List("2.11.12", "2.12.6")
 val thisScalaJSVersion = "0.6.23"
