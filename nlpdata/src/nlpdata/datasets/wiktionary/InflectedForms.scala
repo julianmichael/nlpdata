@@ -29,6 +29,8 @@ case class InflectedForms(
 
   def allForms: List[LowerCaseString] =
     List(stem, present, presentParticiple, past, pastParticiple)
+
+  override def toString = s"InflectedForms($stem, $present, $presentParticiple, $past, $pastParticiple)"
 }
 
 object InflectedForms {
